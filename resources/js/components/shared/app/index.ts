@@ -1,0 +1,6 @@
+export {default as AppContent} from './AppContent.vue'
+export {default as Breadcrumbs} from './Breadcrumbs.vue'
+export {default as ConsentPersonalData} from './ConsentPersonalData.vue'
+export {default as CookiesNotify} from './CookiesNotify.vue'
+export {default as Icon} from './Icon.vue'
+export {default as PlaceholderPattern} from './PlaceholderPattern.vue'

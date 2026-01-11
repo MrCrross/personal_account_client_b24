@@ -1,0 +1,4 @@
+/sql
+/docs/*.bkp
+/docs/*.dtmp
+/vendor
