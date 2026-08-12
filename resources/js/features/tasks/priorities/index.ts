@@ -4,7 +4,7 @@ import type {TaskPriority} from "@/types";
 import {useLocalStorage} from "@/composables";
 
 export const TaskPriorities = {
-    getOptions: async (): Promise<SelectOption[]> => {
+    getOptions: async (): Promise<SelectOption<number>[]> => {
         const local: string | null = useLocalStorage.get('tasks_priorities_options');
         if (local) {
             return JSON.parse(local);

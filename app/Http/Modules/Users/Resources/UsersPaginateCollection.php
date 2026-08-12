@@ -18,6 +18,8 @@ class UsersPaginateCollection extends ResourceCollection
             'data' => $this->collection->map(static function ($item) {
                 return new UserResource($item);
             }),
+            'has_more' => $this->resource->hasMorePages(),
+            'current_page' => $this->resource->currentPage(),
         ];
     }
 }

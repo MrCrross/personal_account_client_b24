@@ -70,18 +70,18 @@ import {LoaderCircle, PencilIcon, UsersIcon} from 'lucide-vue-next'
 import {SelectOption, TableColumn, User, UserQueryParams} from "@/types";
 import { onMounted, ref} from "vue";
 import {Users} from "@/features";
-import {useModalStore} from "@/store";
-import {useDateFormat} from "@/composables";
+import {useModalStore, } from "@/store";
+import {useDateFormat, usePerPage} from "@/composables";
 
 const formatDate = useDateFormat()
 const modalStore = useModalStore()
 
 const isLoading = ref(true)
 const isLoadingMore = ref(false)
-const loadMore = ref(true);
-const page = ref<number>(0)
-const perPage = ref<SelectOption>()
-const users = ref([])
+const loadMore = ref(false)
+const page = ref<number>(1)
+const perPage = ref<SelectOption>(usePerPage().read())
+const users = ref<User[]>([])
 
 const columns: TableColumn[] = [
     {
@@ -118,42 +118,43 @@ const columns: TableColumn[] = [
         align: 'center'
     },
 ]
+
 onMounted(async () => {
-    await loadUsers(0)
-    isLoading.value = false
+    await loadUsers(1)
 })
 
 const handlePerPageChange = () => {
-    page.value = 0
-    loadUsers()
+    loadUsers(1)
 }
 
 const loadUsers = async (pageNumber?: number, query?: UserQueryParams) => {
-    isLoading.value = true
-    isLoadingMore.value = true
-    if (!query) {
-        query = {}
-    }
-    if (!pageNumber) {
-        page.value++;
-    }
-    if (pageNumber === 0 || page.value === 1) {
-        users.value = []
-    }
-    query.page = pageNumber || page.value
-    query.per_page = perPage.value?.value;
-    const data = await Users.getList(query)
-    if (data.length === 0 || data.length < perPage.value?.value) {
+    const isReset = pageNumber !== undefined
+
+    if (isReset) {
+        page.value = pageNumber || 1
         loadMore.value = false
+        isLoading.value = true
+    } else {
+        page.value++
+        isLoadingMore.value = true
     }
-    users.value = [...users.value, ...data]
+
+    const response = await Users.getList({
+        ...query,
+        page: page.value,
+        per_page: perPage.value ? Number(perPage.value.value) : undefined,
+    })
+
+    users.value = isReset ? response.data : [...users.value, ...response.data]
+    loadMore.value = response.has_more
+
     isLoading.value = false
     isLoadingMore.value = false
 }
 
-const openEditModal = (user: any) => {
+const openEditModal = (user: User) => {
     modalStore.openModal(UserForm, {
-        title:'Редактирование пользователя',
+        title: 'Редактирование пользователя',
         componentProps: {
             user,
             onSaved: handleUserSaved
@@ -164,20 +165,16 @@ const openEditModal = (user: any) => {
 const handleUserSaved = (updatedUser: User) => {
     modalStore.closeModal()
 
-    if (updatedUser && updatedUser.id) {
-        // Обновляем существующего пользователя или добавляем нового
-        const index = users.value.findIndex(u => u.id === updatedUser.id)
-        if (index > -1) {
-            // Обновляем существующего
-            users.value[index] = updatedUser
-        } else {
-            // Добавляем нового в начало
-            users.value.push(updatedUser)
-        }
+    if (!updatedUser || !updatedUser.id) {
+        loadUsers(1)
+        return
+    }
+
+    const index = users.value.findIndex(u => u.id === updatedUser.id)
+    if (index > -1) {
+        users.value[index] = updatedUser
     } else {
-        isLoading.value = true
-        // Если что-то пошло не так, перезагружаем весь список
-        loadUsers()
+        users.value.push(updatedUser)
     }
 }
 </script>

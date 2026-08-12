@@ -28,7 +28,7 @@
                     :tasks="tasks"
                 />
                 <div
-                    v-if="loadMore && perPage?.value < tasks.length"
+                    v-if="loadMore"
                     class="flex justify-center mt-4"
                 >
                     <Button
@@ -64,44 +64,56 @@ import {
     PerPageSelector
 } from "@/components";
 import {Tasks as TasksFeature} from "@/features";
+import {usePerPage} from "@/composables";
 import {SelectOption, Task, TaskQueryParams, TypeViewData} from "@/types";
 
 const typeView: Ref<TypeViewData> = ref('card')
 const isLoading = ref(true);
-const loadMore = ref(true);
+const loadMore = ref(false);
 const isLoadingMore = ref(false)
 const tasks: Ref<Task[]> = ref([])
 const page = ref<number>(1)
-const perPage = ref<SelectOption>()
+// Значение читается из localStorage синхронно, чтобы первый запрос уже ушёл с нужным per_page
+const perPage = ref<SelectOption>(usePerPage().read())
+// Текущие фильтры — переиспользуются при смене per_page и подгрузке следующих страниц
+const activeQuery = ref<TaskQueryParams>({})
 
-onMounted( async () => {
-    tasks.value = await TasksFeature.getList()
-    isLoading.value = false
+onMounted(async () => {
+    await loadTasks(1)
 })
+
 const handlePerPageChange = () => {
-    page.value = 0
-    loadTasks()
+    loadTasks(1)
 }
 
 const loadTasks = async (pageNumber?: number, query?: TaskQueryParams) => {
-    isLoading.value = true
-    isLoadingMore.value = true
-    if (!query) {
-        query = {}
+    // pageNumber задан (первый запрос, фильтр, смена per_page) → сброс списка;
+    // pageNumber не задан (кнопка «Загрузить еще») → подгрузка следующей страницы
+    const isReset = pageNumber !== undefined
+
+    if (query !== undefined) {
+        activeQuery.value = query
     }
-    if (!pageNumber) {
-        page.value++;
-    }
-    if (pageNumber === 0 || page.value === 1) {
-        tasks.value = []
-    }
-    query.page = pageNumber || page.value
-    query.per_page = perPage.value?.value;
-    const data = await TasksFeature.getList(query)
-    if (data.length === 0 || data.length < perPage.value?.value) {
+
+    if (isReset) {
+        page.value = pageNumber || 1
         loadMore.value = false
+        isLoading.value = true
+    } else {
+        page.value++
+        isLoadingMore.value = true
     }
-    tasks.value = [...tasks.value, ...data]
+
+    const perPageValue = perPage.value ? Number(perPage.value.value) : undefined
+    const response = await TasksFeature.getList({
+        ...activeQuery.value,
+        page: page.value,
+        per_page: perPageValue,
+    })
+
+    tasks.value = isReset ? response.data : [...tasks.value, ...response.data]
+    loadMore.value = response.has_more
+
     isLoading.value = false
     isLoadingMore.value = false
 }

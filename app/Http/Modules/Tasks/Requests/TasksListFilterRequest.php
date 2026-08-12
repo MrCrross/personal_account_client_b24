@@ -18,6 +18,7 @@ class TasksListFilterRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'search' => ['string', 'max:255'],
             'problem_type_id' => ['integer', Rule::exists(TaskProblemType::class, 'id')],
             'priority_id' => ['integer', Rule::exists(TaskPriority::class, 'b_priority')],
             'status_id' => ['integer', Rule::exists(TaskStatus::class, 'b_status')],

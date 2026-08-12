@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { SunIcon, MoonIcon } from 'lucide-vue-next';
-import { useAppearance } from '@/composables';
+import { useAppearance } from '@/composables/utils/useAppearance';
 import { Appearance } from '@/types';
 
 const { appearance, updateAppearance } = useAppearance();

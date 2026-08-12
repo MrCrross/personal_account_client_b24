@@ -32,6 +32,8 @@ const props = defineProps<{
     type: ToastType
     duration?: number
     closeable?: boolean
+    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+    icon?: string
 }>()
 
 const emit = defineEmits<{

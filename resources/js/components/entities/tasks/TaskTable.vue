@@ -4,6 +4,10 @@
         :columns="columns"
         :data="tasks"
         :selectable="true"
+        :fixed-header="true"
+        :sticky-first-column="true"
+        container-class="max-h-[70vh]"
+        @row-click="openTask"
     >
         <template #cell-status="{ item }">
             <Badge :variant="item.status.variant || 'default'">
@@ -42,8 +46,8 @@
                     variant="ghost"
                     size="sm"
                     class="h-8 w-8 p-0"
-                    @click="openViewModal(item)"
                     title="Подробнее"
+                    @click.stop="openTask(item)"
                 >
                     <Eye class="w-4 h-4" title="Подробнее" />
                 </Button>
@@ -56,14 +60,14 @@
 </template>
 
 <script setup lang="ts">
-import {Badge, BadgePriority, Button, DataTable, TaskDetailsModal} from "@/components";
+import {Badge, BadgePriority, Button, DataTable} from "@/components";
 import {Eye} from 'lucide-vue-next'
 import {Task, TableColumn} from "@/types";
-import {useModalStore} from "@/store";
+import {router} from "@inertiajs/vue3";
+import {show} from "@/routes/tasks";
 import {useDateFormat} from "@/composables";
 
 const formatDate = useDateFormat()
-const modalStore = useModalStore()
 
 interface Props {
     tasks: Task[]
@@ -82,14 +86,8 @@ const columns: TableColumn[] = [
     { key: 'actions', label: '', align: 'center' },
 ];
 
-const openViewModal = (task: any) => {
-    modalStore.openModal(TaskDetailsModal, {
-        title: 'Детали задачи',
-        size: '4xl',
-        componentProps: {
-            task
-        }
-    })
+const openTask = (task: Task) => {
+    router.visit(show(task.id).url)
 }
 </script>
 

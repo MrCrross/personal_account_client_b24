@@ -26,9 +26,6 @@ class Task extends PrefixedModel
         'updated_at',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(
@@ -38,9 +35,6 @@ class Task extends PrefixedModel
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function bTask(): BelongsTo
     {
         return $this->belongsTo(
@@ -50,9 +44,6 @@ class Task extends PrefixedModel
         );
     }
 
-    /**
-     * @return HasMany
-     */
     public function bResult(): HasMany
     {
         return $this->hasMany(
@@ -62,15 +53,24 @@ class Task extends PrefixedModel
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function problemType(): BelongsTo
     {
         return $this->belongsTo(
             TaskProblemType::class,
             'problem_type_id',
             'id'
+        );
+    }
+
+    /**
+     * Локальная переписка по обращению (в Битрикс уходит копией-комментарием).
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(
+            TaskMessage::class,
+            'task_id',
+            'id',
         );
     }
 }

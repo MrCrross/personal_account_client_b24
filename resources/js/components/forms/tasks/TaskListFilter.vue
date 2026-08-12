@@ -7,6 +7,10 @@
                 <CardTitle class="text-lg">Фильтры</CardTitle>
                 <CardContent>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                        <div class="md:col-span-2">
+                            <Label class="text-sm font-medium">Поиск (номер заказа или название)</Label>
+                            <Input v-model="filterForm.search" placeholder="Например, 123 или часть названия"/>
+                        </div>
                         <div>
                             <Label class="text-sm font-medium">Тип обращения</Label>
                             <TaskProblemTypeSelect v-model="filterForm.problemType"/>
@@ -25,7 +29,10 @@
                         </div>
                         <div>
                             <Label class="text-sm font-medium">Дата обращения</Label>
-                            <DateRangePicker v-model="filterForm.dateRange"/>
+                            <DateRangePicker
+                                :model-value="(filterForm.dateRange as DateRange | undefined)"
+                                @update:model-value="(v: DateRange | undefined) => (filterForm.dateRange = v)"
+                            />
                         </div>
                     </div>
                     <Button type="submit" variant="default">
@@ -48,11 +55,12 @@ import {
     CardHeader,
     CardTitle,
     CardContent,
-    TaskStatusSelect, InputPhone, InputList
+    TaskStatusSelect, InputPhone, InputList, Input
 } from "@/components";
 import {useDateFormat} from "@/composables";
-import {DateRangePickerInterface, SelectOption, TaskQueryParams} from "@/types";
+import {SelectOption, TaskQueryParams} from "@/types";
 import {TaskPriorities} from "@/features";
+import {type DateRange} from "reka-ui";
 
 interface Props {
     load?: (page: number, query: TaskQueryParams) => void
@@ -60,42 +68,52 @@ interface Props {
 const props = defineProps<Props>()
 
 interface Form {
+    search: string,
     problemType: SelectOption | null,
     status: SelectOption | null,
     priority: SelectOption | null,
     phone: string,
-    dateRange: DateRangePickerInterface | undefined
+    dateRange: DateRange | undefined
 }
 
 const filterForm = ref<Form>({
+    search: '',
     problemType: null,
     status: null,
     priority: null,
     phone: '',
     dateRange: undefined,
-    term: '',
 });
 
 const filterSubmit = async () => {
     const dateFormat = useDateFormat();
     const filterValue = filterForm.value;
-    const formData = {
-        problem_type_id: filterValue.problemType?.value,
-        status_id: filterValue.status?.value,
-        priority_id: filterValue.priority?.value,
-        date_start: null,
-        date_end: null,
-        person_phone: filterValue.phone || null
-    };
+    const formData: TaskQueryParams = {}
+
+    const trimmedSearch = filterValue.search.trim()
+    if (trimmedSearch) {
+        formData.search = trimmedSearch
+    }
+    if (filterValue.problemType) {
+        formData.problem_type_id = Number(filterValue.problemType.value)
+    }
+    if (filterValue.status) {
+        formData.status_id = Number(filterValue.status.value)
+    }
+    if (filterValue.priority) {
+        formData.priority_id = Number(filterValue.priority.value)
+    }
+    if (filterValue.phone) {
+        formData.person_phone = filterValue.phone
+    }
     if (filterValue.dateRange?.start) {
         formData.date_start = dateFormat.formatFromCalendar(filterValue.dateRange.start)
     }
     if (filterValue.dateRange?.end) {
         formData.date_end = dateFormat.formatFromCalendar(filterValue.dateRange.end)
     }
-    if (props.load) {
-        props.load(1, formData)
-    }
+
+    props.load?.(1, formData)
 }
 </script>
 

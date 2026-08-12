@@ -54,7 +54,7 @@ const formatDate = useDateFormat()
 const modalStore = useModalStore()
 
 const isLoading = ref(true)
-const roles = ref([])
+const roles = ref<Role[]>([])
 
 const columns: TableColumn[] = [
     {
@@ -106,33 +106,30 @@ const loadRoles = async () => {
     isLoading.value = false
 }
 
-const openEditModal = (role: any) => {
+const openEditModal = (role: Role) => {
     modalStore.openModal(RoleForm, {
         title: 'Редактирование роли',
         componentProps: {
             role,
-            onSaved: handleUserSaved
+            onSaved: handleRoleSaved
         }
     })
 }
 
-const handleUserSaved = (updatedData: Role) => {
+const handleRoleSaved = (updatedData: Role) => {
     modalStore.closeModal()
 
-    if (updatedData && updatedData.id) {
-        // Обновляем существующего пользователя или добавляем нового
-        const index = roles.value.findIndex(r => r.id === updatedData.id)
-        if (index > -1) {
-            // Обновляем существующего
-            roles.value[index] = updatedData
-        } else {
-            // Добавляем нового в начало
-            roles.value.push(updatedData)
-        }
-    } else {
+    if (!updatedData || !updatedData.id) {
         isLoading.value = true
-        // Если что-то пошло не так, перезагружаем весь список
         loadRoles()
+        return
+    }
+
+    const index = roles.value.findIndex(r => r.id === updatedData.id)
+    if (index > -1) {
+        roles.value[index] = updatedData
+    } else {
+        roles.value.push(updatedData)
     }
 }
 </script>

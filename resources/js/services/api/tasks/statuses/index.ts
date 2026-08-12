@@ -1,9 +1,9 @@
 import {AxiosResponse} from "axios";
-import {APIResponse, TaskStatusResponse} from "@/types";
+import {TaskStatusResponse} from "@/types";
 import ApiService from "@/services/service";
 
 export default {
-    getAll(): Promise<AxiosResponse<APIResponse<TaskStatusResponse>>> {
+    getAll(): Promise<AxiosResponse<TaskStatusResponse>> {
         return ApiService.get('/api/tasks/statuses');
     },
 };

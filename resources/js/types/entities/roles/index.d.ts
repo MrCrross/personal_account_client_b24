@@ -1,3 +1,5 @@
+import { SelectOption } from "@/types";
+
 export interface Role {
     id: number
     name: string
@@ -15,11 +17,12 @@ export interface Permission {
     created_at?: string
 }
 
+// Форма для UI. Поля транслируются в payload бэкенда внутри features/roles.
 export interface RoleForm {
     name: string
     title: string
-    guard_name: string
-    permissions: number[] | null
+    guard_name: SelectOption<string> | null
+    permissions: number[]
 }
 
 export type RolesResponse = {

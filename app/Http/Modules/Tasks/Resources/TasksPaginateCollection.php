@@ -18,6 +18,8 @@ class TasksPaginateCollection extends ResourceCollection
             'data' => $this->collection->map(static function ($task) {
                 return new TaskResource($task);
             }),
+            'has_more' => $this->resource->hasMorePages(),
+            'current_page' => $this->resource->currentPage(),
         ];
     }
 }

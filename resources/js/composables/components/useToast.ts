@@ -12,8 +12,9 @@ export interface ToastOptions {
     closeable?: boolean
 }
 
-export interface ToastItem extends ToastOptions {
+export interface ToastItem extends Omit<ToastOptions, 'type'> {
     id: number
+    type: ToastType
 }
 
 const toasts = ref<ToastItem[]>([])
@@ -27,11 +28,11 @@ export const useToast = () => {
 
         const toast: ToastItem = {
             id: idCounter++,
-            type: 'info',
             duration: 3000,
             position: 'top-right',
             closeable: true,
-            ...toastOptions
+            ...toastOptions,
+            type: toastOptions.type ?? 'info',
         }
 
         toasts.value.push(toast)

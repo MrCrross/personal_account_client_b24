@@ -4,7 +4,7 @@ import type {ProblemType} from "@/types";
 import {useLocalStorage} from "@/composables";
 
 export const TaskProblemTypes = {
-    getOptions: async (): Promise<SelectOption[]> => {
+    getOptions: async (): Promise<SelectOption<number>[]> => {
         const local: string | null = useLocalStorage.get('tasks_problem_types_options');
         if (local) {
             return JSON.parse(local);

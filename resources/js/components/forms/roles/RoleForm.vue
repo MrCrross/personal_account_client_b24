@@ -37,11 +37,11 @@
                         v-for="permission in permissions"
                         :key="permission.id"
                         class="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 cursor-pointer"
-                        :class="{ 'bg-primary/10 border-primary': roleForm.permissions?.includes(permission.id) }"
+                        :class="{ 'bg-primary/10 border-primary': roleForm.permissions.includes(permission.id) }"
                     >
                         <Label class="cursor-pointer flex-1">
                             <Checkbox
-                                :model-value="roleForm.permissions?.includes(permission.id)"
+                                :model-value="roleForm.permissions.includes(permission.id)"
                                 @update:model-value="togglePermission(permission.id)"
                             />
                             {{ `${permission.title} (${permission.name} - ${permission.guard_name})` }}
@@ -66,92 +66,86 @@
 <script setup lang="ts">
 import {LoaderCircle} from 'lucide-vue-next'
 import {Button, Checkbox, Input, RequiredMark, Label, InputList} from "@/components";
-import {computed, onMounted, Ref, ref, watch} from "vue";
-import {Permission, Role, RoleForm, SelectOption} from "@/types";
+import {computed, onMounted, ref, watch} from "vue";
+import type {Permission, Role, RoleForm, SelectOption} from "@/types";
 import {Roles} from "@/features";
 import {useToast} from "@/composables";
 
-const guardOptions: SelectOption[] = [
-    {
-        value: 'api',
-        label: 'API',
-    },
-    {
-        value: 'web',
-        label: 'Страницы',
-    },
+const guardOptions: SelectOption<string>[] = [
+    {value: 'api', label: 'API'},
+    {value: 'web', label: 'Страницы'},
 ]
+
+interface Props {
+    role?: Role
+}
+const props = defineProps<Props>()
+const emit = defineEmits<{
+    saved: [role: Role]
+    cancel: []
+}>()
 
 const roleForm = ref<RoleForm>({
     name: '',
     title: '',
     guard_name: guardOptions[1],
-    permissions: []
+    permissions: [],
 })
-interface Props {
-    role?: Role
-}
 
-const emit = defineEmits(['saved', 'cancel'])
-const props = defineProps<Props>()
 const isEdit = computed(() => !!props.role)
-const permissionsAll: Ref<Permission[]> = ref([])
-const permissions: Ref<Permission[]> = ref([])
+const permissionsAll = ref<Permission[]>([])
+const permissions = ref<Permission[]>([])
 const isSubmitting = ref(false)
 
-watch(() => roleForm.value.guard_name, (newGuardName, oldGuardName) => {
-    if (newGuardName !== oldGuardName) {
-        if (newGuardName?.value) {
-            updatePermissions(newGuardName.value)
-        }else {
-            updatePermissions('')
-        }
-
-    }
+// При смене guard_name пересчитываем доступные права и оставляем из выбранных
+// только те, что валидны для нового guard. Так инициализация формы при редактировании
+// не стирает уже выбранные права (они валидны для текущего guard).
+watch(() => roleForm.value.guard_name, (newGuard) => {
+    filterPermissions(newGuard?.value ?? '')
+    const validIds = new Set(permissions.value.map(p => p.id))
+    roleForm.value.permissions = roleForm.value.permissions.filter(id => validIds.has(id))
 })
+
+const filterPermissions = (guardName: string) => {
+    permissions.value = permissionsAll.value.filter(p => p.guard_name === guardName)
+}
 
 onMounted(async () => {
     permissionsAll.value = await Roles.getPermissions()
-    updatePermissions(roleForm.value.guard_name?.value || '');
-    if (isEdit.value && props?.role) {
+    if (isEdit.value && props.role) {
         const role = props.role
         roleForm.value = {
             name: role.name,
             title: role.title,
-            guard_name: guardOptions.filter((item) => item.value === role.guard_name)[0],
-            permissions: role?.permissions?.map((permission: Permission) => permission.id) || []
+            guard_name: guardOptions.find(o => o.value === role.guard_name) ?? null,
+            permissions: role.permissions?.map((p: Permission) => p.id) ?? [],
         }
     }
+    filterPermissions(roleForm.value.guard_name?.value ?? '')
 })
-const togglePermission = (permissionId: number) => {
-    const index = roleForm.value.permissions?.indexOf(permissionId)
-    if (typeof index !== "undefined") {
-        if (index > -1) {
-            roleForm.value.permissions?.splice(index, 1)
-        } else {
-            roleForm.value.permissions?.push(permissionId)
-        }
-    }
-}
 
-const updatePermissions = (guardName: string) => {
-    permissions.value = permissionsAll.value.filter((permission: Permission) => permission.guard_name === guardName)
-    roleForm.value.permissions = []
+const togglePermission = (permissionId: number) => {
+    const index = roleForm.value.permissions.indexOf(permissionId)
+    if (index > -1) {
+        roleForm.value.permissions.splice(index, 1)
+    } else {
+        roleForm.value.permissions.push(permissionId)
+    }
 }
 
 const submitForm = async () => {
-    const toast = useToast();
-    if (isEdit.value && props?.role) {
-        const role = await Roles.update(props.role.id, roleForm.value)
-        toast.success('Роль успешно изменена')
+    const toast = useToast()
+    isSubmitting.value = true
+    try {
+        const role = isEdit.value && props.role
+            ? await Roles.update(props.role.id, roleForm.value)
+            : await Roles.store(roleForm.value)
+        toast.success(isEdit.value ? 'Роль успешно изменена' : 'Роль успешно создана')
         emit('saved', role)
-    } else {
-        await Roles.store(roleForm.value)
-        toast.success('Роль успешно создана')
+    } catch (error) {
+        console.error('Ошибка сохранения роли:', error)
+    } finally {
+        isSubmitting.value = false
     }
 }
 </script>
-
-<style scoped>
-
-</style>

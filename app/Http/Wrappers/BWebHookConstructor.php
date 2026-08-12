@@ -11,13 +11,14 @@ abstract class BWebHookConstructor
     private string $webhook;
     private string $link = '';
     private array $bodyData = [];
-    protected const CREATED_BY_USER = 312; // БОТ ФЛЕШ-ФОРМАТ
+    protected int $createdByUser;
     public function __construct()
     {
         $this->webhook = config('b24.webhook');
         if (!Str::endsWith($this->webhook, '/')) {
             $this->webhook .= '/';
         }
+        $this->createdByUser = config('b24.createdByUser');
     }
 
     /**

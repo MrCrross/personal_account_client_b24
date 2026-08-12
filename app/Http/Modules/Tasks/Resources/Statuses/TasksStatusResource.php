@@ -14,7 +14,11 @@ class TasksStatusResource extends JsonResource
      */
     public function toArray(Request $request): object
     {
-        return (object)[
+        if (! $this->resource) {
+            return (object) ['id' => null, 'name' => null, 'variant' => null];
+        }
+
+        return (object) [
             'id' => $this->id,
             'name' => $this->name,
             'variant' => $this->variant,

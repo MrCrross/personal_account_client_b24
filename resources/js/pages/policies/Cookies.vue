@@ -30,18 +30,22 @@
 import {DataTable} from "@/components";
 import {AppLayout} from "@/layouts";
 import {Head} from "@inertiajs/vue3";
+import type {TableColumn} from "@/types";
 
-const columns = [
+const columns: TableColumn[] = [
     {
         key: "id",
+        label: "",
         headerClass: "p-0"
     },
     {
         key: "name",
+        label: "",
         headerClass: "p-0"
     },
     {
         key: "description",
+        label: "",
         headerClass: "p-0"
     }
 ]

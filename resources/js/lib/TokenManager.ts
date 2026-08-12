@@ -2,6 +2,15 @@ import {API} from "@/services";
 
 export class TokenManager {
     private static refreshTimer: number | null = null;
+    // Текущий запрос на обновление — чтобы таймер и возврат на вкладку не дёргали refresh параллельно
+    private static refreshing: Promise<string> | null = null;
+
+    // Обновляем токен, когда осталось ~20% его жизни, но не позже чем за столько секунд до истечения.
+    // Важно: /api/auth/refresh висит под auth:api и отклоняет уже истёкший токен — поэтому обновлять
+    // нужно заранее, пока токен ещё валиден, а не впритык к моменту истечения.
+    private static readonly MIN_MARGIN_SECONDS = 30;
+    private static readonly FALLBACK_MARGIN_SECONDS = 300;
+    private static readonly RETRY_DELAY_MS = 30000;
 
     public static setToken(token_type: string, access_token: string, expiresIn: number = 3600): void {
         const issuedAt = Math.floor(Date.now() / 1000);
@@ -34,48 +43,77 @@ export class TokenManager {
         return Math.max(0, parseInt(expiresAt) - currentTime);
     }
 
-    private static scheduleRefresh(expiresAt: number): void {
-        // Очищаем предыдущий таймер
-        if (this.refreshTimer) {
+    private static clearTimer(): void {
+        if (this.refreshTimer !== null) {
             clearTimeout(this.refreshTimer);
             this.refreshTimer = null;
         }
+    }
 
-        // Обновляем во время истечения срока
-        const refreshTime = expiresAt * 1000;
-        const currentTime = Date.now();
-        const timeUntilRefresh = refreshTime - currentTime;
+    private static scheduleRefresh(expiresAt: number): void {
+        this.clearTimer();
+
+        const issuedAt = parseInt(localStorage.getItem('token_issued_at') ?? '', 10);
+        const lifetime = Number.isFinite(issuedAt) && issuedAt > 0 ? expiresAt - issuedAt : 0;
+        const margin = lifetime > 0
+            ? Math.max(TokenManager.MIN_MARGIN_SECONDS, Math.floor(lifetime * 0.2))
+            : TokenManager.FALLBACK_MARGIN_SECONDS;
+
+        const timeUntilRefresh = (expiresAt - margin) * 1000 - Date.now();
 
         if (timeUntilRefresh > 0) {
-            this.refreshTimer = setTimeout(async () => {
-                await this.refreshToken();
+            this.refreshTimer = window.setTimeout(() => {
+                void this.refreshToken();
             }, timeUntilRefresh);
         } else {
-            // Если время уже прошло, сразу обновляем
-            this.refreshToken();
+            // Уже в окне обновления — обновляем немедленно, пока токен ещё валиден
+            void this.refreshToken();
         }
     }
 
-    public static async refreshToken(): Promise<string> {
+    private static scheduleRetry(): void {
+        this.clearTimer();
+        this.refreshTimer = window.setTimeout(() => {
+            void this.refreshToken();
+        }, TokenManager.RETRY_DELAY_MS);
+    }
+
+    public static refreshToken(): Promise<string> {
+        // Дедуп: если обновление уже идёт — возвращаем тот же промис
+        if (this.refreshing) {
+            return this.refreshing;
+        }
+
+        this.refreshing = this.performRefresh().finally(() => {
+            this.refreshing = null;
+        });
+
+        return this.refreshing;
+    }
+
+    private static async performRefresh(): Promise<string> {
         try {
-            // Получаем текущий токен для отправки на сервер
             const currentToken = this.getToken();
 
             if (!currentToken) {
                 throw new Error('No token available for refresh');
             }
 
-            // Отправляем запрос на обновление токена
             const response = await API.auth.refreshToken();
             const { token_type, access_token, expires_on } = response.data.data;
-            // Сохраняем новый токен
+            // Сохраняем новый токен и планируем следующее обновление
             this.setToken(token_type, access_token, expires_on);
 
             return access_token;
         } catch (error) {
-            console.error('Token refresh failed:', error);
-            this.logout();
+            // Токен ещё валиден (сетевой сбой/троттлинг фоновой вкладки) — не разлогиниваем,
+            // а пробуем позже. Разлогиниваем только когда токен реально истёк.
+            if (this.isTokenValid()) {
+                this.scheduleRetry();
+                throw error;
+            }
 
+            await this.logout();
             throw error;
         }
     }
@@ -85,27 +123,40 @@ export class TokenManager {
         localStorage.removeItem('token_issued_at');
         localStorage.removeItem('token_expired_at');
 
-        if (this.refreshTimer) {
-            clearTimeout(this.refreshTimer);
-            this.refreshTimer = null;
-        }
+        this.clearTimer();
     }
 
     // Восстановление таймера при загрузке приложения
     public static init(): void {
+        // Фоновые вкладки троттлят setTimeout, поэтому при возврате на вкладку перепроверяем токен
+        // и обновляем его, пока он ещё валиден (иначе пропущенный таймер привёл бы к разлогину).
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                this.refreshIfNeeded();
+            }
+        });
+        window.addEventListener('focus', () => this.refreshIfNeeded());
+
+        this.refreshIfNeeded();
+    }
+
+    private static refreshIfNeeded(): void {
         const expiresAt = localStorage.getItem('token_expired_at');
         const token = localStorage.getItem('access_token');
 
-        if (token && expiresAt) {
-            const expiresAtNum = parseInt(expiresAt);
-            const currentTime = Math.floor(Date.now() / 1000);
+        if (!token || !expiresAt) {
+            return;
+        }
 
-            if (expiresAtNum > currentTime) {
-                // Токен еще валиден, планируем обновление
-                this.scheduleRefresh(expiresAtNum);
-            } else {
-                this.forceRefresh();
-            }
+        const expiresAtNum = parseInt(expiresAt, 10);
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (expiresAtNum > currentTime) {
+            // Токен валиден — (пере)планируем обновление; если пора, scheduleRefresh обновит сразу
+            this.scheduleRefresh(expiresAtNum);
+        } else {
+            // Токен истёк — пробуем обновить (сработает в пределах refresh_ttl и валидной сессии)
+            void this.forceRefresh();
         }
     }
 

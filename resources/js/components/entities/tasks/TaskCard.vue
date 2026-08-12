@@ -44,10 +44,10 @@
 <script setup lang="ts">
 import type {Task} from '@/types';
 import {useBBCode, useDateFormat} from "@/composables";
-import {Badge, BadgePriority, Button, Card, EditorReadonly, TaskDetailsModal} from "@/components";
+import {Badge, BadgePriority, Button, Card, EditorReadonly} from "@/components";
 import {Eye} from "lucide-vue-next";
-import {useModalStore} from "@/store";
-import {usePage} from "@inertiajs/vue3";
+import {router, usePage} from "@inertiajs/vue3";
+import {show} from "@/routes/tasks";
 import {computed} from "vue";
 
 const bbCodeConvert = useBBCode()
@@ -59,14 +59,7 @@ const props = defineProps<{
     task: Task
 }>()
 
-const modalStore = useModalStore()
 const handleViewDetails = () => {
-    modalStore.openModal(TaskDetailsModal, {
-        title: 'Детали задачи',
-        size: '4xl',
-        componentProps: {
-            task: props.task
-        }
-    })
+    router.visit(show(props.task.id).url)
 }
 </script>

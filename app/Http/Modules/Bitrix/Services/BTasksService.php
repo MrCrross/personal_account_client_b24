@@ -4,15 +4,12 @@ namespace App\Http\Modules\Bitrix\Services;
 
 use App\Http\Modules\Tasks\Enums\TaskStatusesEnum;
 use App\Http\Wrappers\BWebHookConstructor;
-use Carbon\Carbon;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BTasksService extends BWebHookConstructor
 {
-    private static array $DEFAULT_AUDITORS = [1]; // Никита Залесский
-    private static int $RESPONSIBLE_BOT = 312; // БОТ ФЛЕШ-ФОРМАТ
-
     public function store(
         Request $request,
         array $responsibleIds,
@@ -20,9 +17,9 @@ class BTasksService extends BWebHookConstructor
     ): int {
         $this->setRoute('tasks.create');
 
-        $responsibleId = self::$RESPONSIBLE_BOT;
+        $responsibleId = config('b24.default.responsibleId');
         if (empty($auditorIds)) {
-            $auditorIds = self::$DEFAULT_AUDITORS;
+            $auditorIds = config('b24.default.auditors');
         }
 
         $fields = [
@@ -33,10 +30,10 @@ class BTasksService extends BWebHookConstructor
             'ACCOMPLICES' => $responsibleIds,
             'AUDITORS' => $auditorIds,
             'STATUS' => TaskStatusesEnum::NEW->value,
-            'DATE_START' => Carbon::now()->toDateTimeString(),
+            //            'DATE_START' => Carbon::now()->toDateTimeString(),
             'GROUP_ID' => Auth::user()->b_group_id,
-            'CREATED_BY' => self::CREATED_BY_USER,
-            'CREATED_DATE' => Carbon::now()->toDateTimeString(),
+            'CREATED_BY' => $this->createdByUser,
+            //            'CREATED_DATE' => Carbon::now()->toDateTimeString(),
         ];
         $this->addFields($fields);
         $response = $this->execute();
@@ -45,7 +42,8 @@ class BTasksService extends BWebHookConstructor
     }
 
     public function uploadFiles(
-        int $bTaskId, array $filesIds
+        int $bTaskId,
+        array $filesIds
     ): void {
         $this->setRoute('tasks.files.attach');
         foreach ($filesIds as $fileId) {
@@ -61,7 +59,7 @@ class BTasksService extends BWebHookConstructor
         int $bTaskId,
         Request $request,
         string $problemTypeName,
-        string|null $problemName,
+        ?string $problemName,
         int $contactId = 0
     ): void {
         $this->setRoute('tasks.comments.add');
@@ -69,8 +67,8 @@ class BTasksService extends BWebHookConstructor
             'TASKID' => $bTaskId,
             'FIELDS' => [
                 'POST_MESSAGE' => $this->getCommentFromRequest($request, $problemTypeName, $problemName, $contactId),
-                'AUTHOR_ID' => self::CREATED_BY_USER,
-                'POST_DATE' => Carbon::now()->toDateTimeString(),
+                'AUTHOR_ID' => $this->createdByUser,
+                //                'POST_DATE' => Carbon::now()->toDateTimeString(),
             ],
         ];
         $this->setBodyData($fields);
@@ -80,12 +78,13 @@ class BTasksService extends BWebHookConstructor
     private function getCommentFromRequest(
         Request $request,
         string $problemTypeName,
-        string|null $problemName,
+        ?string $problemName,
         int $contactId = 0
     ): string {
+        $b24Domain = rtrim(config('b24.domain'), '/');
         $commentLines = [
             "Контактное лицо: {$request->post('person')} - {$request->post('person_phone')}",
-            "Контакт: https://bitrix.567150.ru/crm/contact/details/{$contactId}/",
+            'Контакт: ' . $b24Domain . "/crm/contact/details/{$contactId}/",
             "Тип проблемы: {$problemTypeName}",
         ];
         if (!empty($problemName)) {
@@ -110,6 +109,34 @@ class BTasksService extends BWebHookConstructor
             }
         }
 
-        return '<p> ' . implode(" </p><p> ", $commentLines) . ' </p>';
+        return '<p> ' . implode(' </p><p> ', $commentLines) . ' </p>';
+    }
+
+    /**
+     * Добавить комментарий в задачу Битрикса от имени бота.
+     * Вложения передаются ID файлов Битрикс-Диска (поле UF_FORUM_MESSAGE_DOC ждёт префикс «n»).
+     * Возвращает ID созданного комментария или null, если Битрикс его не вернул.
+     *
+     * @param int[] $diskFileIds
+     *
+     * @throws ConnectionException
+     */
+    public function addComment(int $bTaskId, string $message, array $diskFileIds = []): ?int
+    {
+        $this->setRoute('tasks.comments.add');
+        $fields = [
+            'POST_MESSAGE' => $message,
+            'AUTHOR_ID' => $this->createdByUser,
+        ];
+        if (!empty($diskFileIds)) {
+            $fields['UF_FORUM_MESSAGE_DOC'] = array_map(static fn($id) => 'n' . $id, $diskFileIds);
+        }
+        $this->setBodyData([
+            'TASKID' => $bTaskId,
+            'FIELDS' => $fields,
+        ]);
+        $response = $this->execute();
+
+        return $response['result'] ?? null;
     }
 }

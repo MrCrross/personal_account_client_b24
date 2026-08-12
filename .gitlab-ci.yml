@@ -1,0 +1,21 @@
+stages:
+  - deploy
+
+deploy_to_server:
+  stage: deploy
+  tags:
+    - lk
+  only:
+    - main  # или master, в зависимости от вашей ветки
+  script:
+    # Раннер стоит прямо на продакшен-сервере — SSH не нужен, работаем в $PROJECT_PATH напрямую.
+    # ВНИМАНИЕ: на сервере должен быть установлен yarn (Classic, v1.x).
+    # Если yarn там не установлен — установить (npm i -g yarn) или временно вернуть npm install / npm run build.
+    - cd $PROJECT_PATH
+    - git pull origin main
+    # composer install ДО yarn build: vite.config.ts подключает wayfinder(), который во время сборки
+    # дёргает `php artisan wayfinder:generate` — нужен уже готовый vendor/autoload.php.
+    - composer install --no-dev --optimize-autoloader --no-interaction
+    - yarn install --frozen-lockfile --production=false
+    - yarn build
+    - php artisan optimize:clear

@@ -12,12 +12,7 @@
 
 <script setup lang="ts">
 import VsSelect from 'vs-vue3-select'
-
-export interface SelectOption {
-    value: number | string
-    label: string
-    disabled?: boolean
-}
+import type { SelectOption } from '@/types'
 
 interface Props {
     modelValue?: SelectOption | null

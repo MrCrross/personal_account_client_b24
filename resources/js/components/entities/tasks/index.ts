@@ -1,6 +1,9 @@
 export {default as TaskCard} from './TaskCard.vue'
-export {default as TaskDetailsModal} from './TaskDetailsModal.vue'
+export {default as TaskDetails} from './TaskDetails.vue'
+export {default as TaskChat} from './TaskChat.vue'
 export {default as TaskTable} from './TaskTable.vue'
+export {default as TaskResultText} from './TaskResultText.vue'
+export {default as DiskFile} from './DiskFile.vue'
 
 export * from './problemTypes'
 export * from './statuses'

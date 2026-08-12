@@ -7,7 +7,7 @@ export default {
     getList: async (queryParams?: UserQueryParams): Promise<AxiosResponse<UserListResponse>> => {
         return await ApiService.get('/api/users', queryParams);
     },
-    getById: async (userId: number): Promise<AxiosResponse<UserListResponse>> => {
+    getById: async (userId: number): Promise<AxiosResponse<User>> => {
         return await ApiService.get('/api/users/' + userId);
     },
     create: async (data: string): Promise<AxiosResponse<User>> => {

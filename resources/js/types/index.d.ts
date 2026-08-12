@@ -51,9 +51,10 @@ export type DateRange = {
     end: DateRangeValue,
 }
 
-export interface SelectOption {
-    value: number | string
+export interface SelectOption<T extends number | string = number | string> {
+    value: T
     label: string
+    disabled?: boolean
 }
 
 export interface Autocomplete {

@@ -19,6 +19,7 @@ export interface User {
     id: number,
     name: string,
     email: string,
+    avatar?: string | null,
     b_group: Autocomplete,
     b_company: Autocomplete,
     telegram_chat_id?: string | null,
@@ -50,6 +51,8 @@ export type UserEditForm = {
 
 export type UserListResponse = {
     data: User[]
+    has_more: boolean
+    current_page: number
 }
 
 export interface UserQueryParams {

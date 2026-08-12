@@ -1,0 +1,12 @@
+# ── Зависимости ───────────────────────────────────────────────
+vendor/
+node_modules/
+
+
+# ── Сборка и кэш ──────────────────────────────────────────────
+public/build/
+public/hot
+public/mix-manifest.json
+bootstrap/cache/
+.phpunit.cache/
+.php-cs-fixer.cache

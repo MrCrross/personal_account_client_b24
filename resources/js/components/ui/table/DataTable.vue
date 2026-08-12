@@ -2,11 +2,13 @@
     <div class="w-full">
         <!-- Table Container -->
         <div
+            ref="scrollContainer"
             class="relative overflow-auto border rounded-lg"
             :class="cn([
         'bg-background border-border',
         containerClass
       ])"
+            @wheel="handleWheel"
         >
             <!-- Table -->
             <table class="w-full text-sm">
@@ -19,10 +21,10 @@
                 'px-4 py-3 text-left font-medium whitespace-nowrap',
                 getAlignmentClass(column.align),
                 column.headerClass,
-                {
-                  'cursor-pointer hover:bg-muted/70 transition-colors': column.sortable,
-                  'sticky top-0': fixedHeader
-                }
+                column.sortable && 'cursor-pointer hover:bg-muted/70 transition-colors',
+                fixedHeader && !(stickyFirstColumn && index === 0) && 'sticky top-0 z-10 bg-muted',
+                stickyFirstColumn && index === 0 && !fixedHeader && 'sticky left-0 z-20 bg-muted',
+                stickyFirstColumn && index === 0 && fixedHeader && 'sticky top-0 left-0 z-30 bg-muted',
               ])"
                         @click="column.sortable && handleSort(column.key)"
                     >
@@ -60,7 +62,7 @@
                     v-for="(item, rowIndex) in sortedData"
                     :key="getRowKey(item, rowIndex)"
                     :class="cn([
-              'border-b border-border transition-colors',
+              'group/row border-b border-border transition-colors',
               rowClass?.(item, rowIndex),
               {
                 'hover:bg-muted/30': !rowClass,
@@ -75,7 +77,8 @@
                         :class="cn([
         'px-4 py-3',
         getAlignmentClass(column.align),
-        column.cellClass
+        column.cellClass,
+        stickyFirstColumn && colIndex === 0 && 'dt-sticky-cell sticky left-0 z-10'
     ])"
                     >
                         <slot
@@ -125,6 +128,7 @@ interface Props {
     isLoading?: boolean
     selectable?: boolean
     fixedHeader?: boolean
+    stickyFirstColumn?: boolean
     containerClass?: string
     rowClass?: (item: any, index: number) => string
 }
@@ -132,8 +136,26 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     defaultOrder: 'asc',
     rowKey: 'id',
-    fixedHeader: false
+    fixedHeader: false,
+    stickyFirstColumn: false,
 })
+
+const scrollContainer = ref<HTMLElement | null>(null)
+
+// Shift+wheel и горизонтальные тачпад-жесты → горизонтальная прокрутка контейнера.
+// Без shift вертикальное колесо работает обычным образом (страница/таблица).
+const handleWheel = (event: WheelEvent) => {
+    const el = scrollContainer.value
+    if (!el) return
+
+    const hasHorizontalOverflow = el.scrollWidth > el.clientWidth
+    if (!hasHorizontalOverflow) return
+
+    if (event.shiftKey && event.deltaY !== 0) {
+        event.preventDefault()
+        el.scrollLeft += event.deltaY
+    }
+}
 
 const emit = defineEmits<{
     'row-click': [item: any]
@@ -192,6 +214,17 @@ const columnsWithSlots = computed(() => {
 </script>
 
 <style scoped>
+/* Sticky-first-column: фон должен быть непрозрачным, иначе горизонтально
+   прокрученный контент других ячеек просвечивает сквозь полупрозрачный
+   bg-muted/30 на hover. На hover подбираем цвет = bg-muted поверх
+   bg-background через color-mix, чтобы визуально совпасть с остальной строкой. */
+.dt-sticky-cell {
+    background-color: var(--background);
+}
+tr:hover .dt-sticky-cell {
+    background-color: color-mix(in srgb, var(--background), var(--muted) 30%);
+}
+
 /* Естественная прокрутка с полупрозрачными скроллбарами */
 .overflow-auto {
     scrollbar-width: thin;

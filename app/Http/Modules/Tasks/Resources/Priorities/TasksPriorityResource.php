@@ -14,9 +14,13 @@ class TasksPriorityResource extends JsonResource
      */
     public function toArray(Request $request): object
     {
-        return (object)[
+        if (! $this->resource) {
+            return (object) ['id' => null, 'name' => null];
+        }
+
+        return (object) [
             'id' => $this->id ?? $this->b_priority,
-            'name' => $this->name
+            'name' => $this->name,
         ];
     }
 }

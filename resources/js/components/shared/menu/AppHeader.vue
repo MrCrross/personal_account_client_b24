@@ -163,7 +163,7 @@ import {toUrl, urlIsActive} from '@/lib/utils';
 // import {dashboard} from '@/routes';
 import type {NavItem} from '@/types';
 import {InertiaLinkProps, Link, usePage} from '@inertiajs/vue3';
-import {Menu, NotebookText, Search, Settings} from 'lucide-vue-next';
+import {Menu, NotebookText, Settings} from 'lucide-vue-next';
 import {computed, onMounted, Ref, ref} from 'vue';
 import {useBreadcrumbStore} from "@/store";
 

@@ -239,7 +239,7 @@ const handleFiles = (newFiles: FileList | null) => {
         files.value = validFiles.slice(0, 1)
     }
 
-    emits('update:modelValue', files.value.map(f => f.originalFile || f))
+    emits('update:modelValue', files.value.flatMap(f => f.originalFile ? [f.originalFile] : []))
 }
 
 const handleDrop = (e: DragEvent) => {
@@ -269,7 +269,7 @@ const removeFile = (index: number) => {
     if (props.disabled) return
 
     files.value.splice(index, 1)
-    emits('update:modelValue', files.value.map(f => f.originalFile || f))
+    emits('update:modelValue', files.value.flatMap(f => f.originalFile ? [f.originalFile] : []))
 }
 
 const triggerFileInput = () => {

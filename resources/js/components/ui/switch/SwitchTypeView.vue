@@ -50,7 +50,7 @@ const viewOptions = [
     }
 ]
 
-const handleViewChange = (value: TypeViewData) => {
-    emit('update:modelValue', value)
+const handleViewChange = (value: string | number) => {
+    emit('update:modelValue', value as TypeViewData)
 }
 </script>

@@ -19,11 +19,36 @@ export interface TaskProblemType {
     name: string
 }
 
-// Тип результата задачи
+// Вложение из Битрикс-Диска (маркер [DISK FILE ID=nXXX] в тексте), уже разрешённое бэком
+export interface TaskDiskFile {
+    id: number
+    name: string
+    is_image: boolean
+    url: string
+}
+
+// Тип результата задачи. Текст — без маркеров вложений, сами файлы вынесены в files (как у описания)
 export interface TaskResult {
     id: number
     text: string
+    files: TaskDiskFile[]
     creator: TaskUser
+    created_at: string
+}
+
+// Автор сообщения переписки
+export interface TaskMessageAuthor {
+    id: number
+    name: string
+}
+
+// Сообщение переписки в обращении (хранится локально, копия уходит в Битрикс)
+export interface TaskMessage {
+    id: number
+    text: string
+    // Вложения резолвятся бэком из Битрикс-Диска (как description_files)
+    files: TaskDiskFile[]
+    author: TaskMessageAuthor
     created_at: string
 }
 
@@ -35,6 +60,7 @@ export interface Task {
     b_id: number
     title: string
     description: string
+    description_files: TaskDiskFile[]
     priority: TaskPriority
     status: TaskStatus
     group: TaskGroup
@@ -49,22 +75,27 @@ export interface Task {
     duration_fact: number | null
     problem_type: TaskProblemType
     results: TaskResult[]
+    messages: TaskMessage[]
     creator: Creator
 }
 
-// Параметры запроса (если нужны)
+// Параметры запроса — имена полей соответствуют тому, что читает бэкенд (TasksListFilterRequest)
 export interface TaskQueryParams {
     page?: number
     per_page?: number
-    status?: number
-    priority?: number
+    search?: string
+    problem_type_id?: number
+    status_id?: number
+    priority_id?: number
+    person_phone?: string
     date_start?: string
     date_end?: string
-    problem_type?: number
 }
 
 export interface TasksResponse {
     data: Task[]
+    has_more: boolean
+    current_page: number
 }
 
 export interface TaskStore {
@@ -95,31 +126,31 @@ interface TaskStoreFormPerson {
 }
 
 interface TaskStoreFormDocument {
-    number: string | null,
-    cost: string | null,
-    contractor: string | null,
+    number: string,
+    cost: string,
+    contractor: string,
 }
 interface TaskStoreFormEquipment {
-    number: string | null,
-    model: string | null,
+    number: string,
+    model: string,
 }
 interface TaskStoreFormOneC {
-    conf: string | null,
-    version: string | null,
-    link: string | null,
+    conf: string,
+    version: string,
+    link: string,
 }
 interface TaskStoreFormSite {
-    os: string | null,
-    browser: string | null,
-    link: string | null,
+    os: string,
+    browser: string,
+    link: string,
 }
 export interface TaskStoreForm {
     name: string
     description: string
     person: TaskStoreFormPerson
-    problemType: SelectOption | null
-    problem: SelectOption | null
-    priority: SelectOption | null
+    problemType: SelectOption<number> | null
+    problem: SelectOption<number> | null
+    priority: SelectOption<number> | null
     files?: File[]
     document: TaskStoreFormDocument,
     equipment: TaskStoreFormEquipment,

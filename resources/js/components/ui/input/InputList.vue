@@ -24,6 +24,7 @@ interface Props {
 
 interface Emits {
     (e: 'update:modelValue', value: SelectOption | null): void
+    (e: 'loaded', value: SelectOption[]): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -81,9 +82,10 @@ watch(() => props.apiFeature, (newApiFeature) => {
 
 // Сбрасываем значение если его нет в новых опциях
 watch(options, (newOptions) => {
-    if (props.modelValue !== null && props.modelValue !== undefined) {
+    const current = props.modelValue
+    if (current) {
         const optionExists = newOptions.some((opt: SelectOption) =>
-            opt.value === props.modelValue.value && !opt.disabled
+            opt.value === current.value && !opt.disabled
         )
 
         if (!optionExists) {

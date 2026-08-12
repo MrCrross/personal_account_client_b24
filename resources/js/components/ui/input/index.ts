@@ -1,5 +1,6 @@
 export { default as Autocomplete } from './Autocomplete.vue';
-export { default as BaseSelect, type SelectOption } from './BaseSelect.vue';
+export { default as BaseSelect } from './BaseSelect.vue';
+export type { SelectOption } from '@/types';
 export { default as InputList } from './InputList.vue';
 export { default as DateRangePicker } from './DateRangePicker.vue';
 export { default as Input } from './Input.vue';

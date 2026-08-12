@@ -3,3 +3,4 @@ export {useInitials} from "./useInitials";
 export {useDateFormat} from "./useDateFormat";
 export {useLocalStorage} from "./useLocalStorage";
 export {useBBCode} from './useBBCode';
+export {usePerPage, perPageOptions} from './usePerPage';

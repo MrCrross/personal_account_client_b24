@@ -260,7 +260,7 @@ watch(() => props.modelValue, (newValue) => {
 
     const currentContent = editor.value.getHTML()
     if (newValue !== currentContent) {
-        editor.value.commands.setContent(newValue || '', false)
+        editor.value.commands.setContent(newValue || '', { emitUpdate: false })
         updateButtonStates()
     }
 })

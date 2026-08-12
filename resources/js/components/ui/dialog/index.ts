@@ -8,5 +8,5 @@ export {default as DialogOverlay} from './DialogOverlay.vue'
 export {default as DialogScrollContent} from './DialogScrollContent.vue'
 export {default as DialogTitle} from './DialogTitle.vue'
 export {default as DialogTrigger} from './DialogTrigger.vue'
-export {default as Modal, type ModalProps} from "./Modal.vue";
+export {default as Modal} from "./Modal.vue";
 export {default as ModalProvider} from "./ModalProvider.vue";

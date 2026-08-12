@@ -40,11 +40,11 @@
                        required
             />
         </div>
-        <div v-if="formTaskCreate.problemType?.value && selectedProblemType?.problems?.length" class="flex flex-col gap-2">
+        <div v-if="selectedProblemType?.problems?.length" class="flex flex-col gap-2">
             <Label class="text-sm font-medium">Обращение по<RequiredMark /></Label>
             <InputList v-model="formTaskCreate.problem"
-                       :data="selectedProblemType.problems"
-                       :key="formTaskCreate.problemType?.value"
+                       :data="selectedProblemType.problems ?? []"
+                       :key="problemTypeId ?? undefined"
                        required
                        placeholder="Выберите возможную причину обращения..."
             />
@@ -111,7 +111,7 @@
                        type="text"/>
             </div>
         </div>
-        <div v-if="[PROBLEM_TYPES_NAME.SITE, PROBLEM_TYPES_NAME.BITRIX].includes(formTaskCreate.problemType?.value)" class="flex flex-col gap-2">
+        <div v-if="problemTypeId === PROBLEM_TYPES_NAME.SITE || problemTypeId === PROBLEM_TYPES_NAME.BITRIX" class="flex flex-col gap-2">
             <div class="flex flex-col gap-2">
                 <Label class="text-sm font-medium">Ссылка на сайт/страницу<RequiredMark /></Label>
                 <Input v-model="formTaskCreate.site.link"
@@ -174,63 +174,54 @@ import {
 } from "@/components";
 import {computed, onMounted, ref, watch} from "vue";
 import {TaskPriorities, TaskProblemTypes, Tasks} from "@/features";
-import type {TaskStoreForm, TaskStore} from "@/types";
+import type {ProblemType, SelectOption, TaskStoreForm, TaskStore} from "@/types";
 import {useBBCode, useToast} from "@/composables";
 
+const toast = useToast()
 const bbCodeConvert = useBBCode()
-const getEmptyForm = (): TaskStoreForm => ({
-    name: '',
-    description: '',
-    person: {
-        name: '',
-        phone: '',
-    },
-    problemType: null,
-    problem: null,
-    priority: null,
-    document: {
-        number: '',
-        cost: '',
-        contractor: '',
-    },
-    equipment: {
-        number: '',
-        model: '',
-    },
-    oneC: {
-        conf: '',
-        version: '',
-        link: '',
-    },
-    site: {
-        link: '',
-        browser: '',
-        os: ''
-    },
-    files: [],
-})
-const formTaskCreate = ref<TaskStoreForm>(getEmptyForm())
 
+// ID типов проблем — должны совпадать с TaskProblemTypesEnum на бэкенде.
 const PROBLEM_TYPES_NAME = {
     DOCUMENT: 1,
     EQUIPMENT: 2,
     ONE_C: 3,
     SITE: 4,
     BITRIX: 5,
-}
+} as const
 
-const problemTypes = ref()
-const priorities = ref()
-const isSubmit = ref(false)
-
-const selectedProblemType = computed(() => {
-    if (!problemTypes.value || formTaskCreate.value.problemType === null) return null
-    return problemTypes.value.find((type: any) => type.id === formTaskCreate.value.problemType?.value)
+const getEmptyForm = (): TaskStoreForm => ({
+    name: '',
+    description: '',
+    person: {name: '', phone: ''},
+    problemType: null,
+    problem: null,
+    priority: null,
+    document: {number: '', cost: '', contractor: ''},
+    equipment: {number: '', model: ''},
+    oneC: {conf: '', version: '', link: ''},
+    site: {link: '', browser: '', os: ''},
+    files: [],
 })
 
+const formTaskCreate = ref<TaskStoreForm>(getEmptyForm())
+const problemTypes = ref<ProblemType[]>([])
+const priorities = ref<SelectOption<number>[]>([])
+const isSubmit = ref(false)
+
+// Числовой id выбранного типа проблемы — для шаблонных условий без приведений типа.
+const problemTypeId = computed<number | null>(() =>
+    formTaskCreate.value.problemType?.value ?? null
+)
+
+const selectedProblemType = computed<ProblemType | null>(() => {
+    if (problemTypeId.value === null) return null
+    return problemTypes.value.find(type => type.id === problemTypeId.value) ?? null
+})
+
+// При смене типа сбрасываем зависимые от типа поля
 watch(() => formTaskCreate.value.problemType, () => {
-    const emptyForm = getEmptyForm();
-    formTaskCreate.value.problem = emptyForm.problem // Сбрасываем проблему при изменении типа
+    const emptyForm = getEmptyForm()
+    formTaskCreate.value.problem = emptyForm.problem
     formTaskCreate.value.document = emptyForm.document
     formTaskCreate.value.equipment = emptyForm.equipment
     formTaskCreate.value.oneC = emptyForm.oneC
@@ -244,18 +235,16 @@ onMounted(async () => {
 
 const taskCreateSubmit = async () => {
     isSubmit.value = true
-    const toast = useToast()
     try {
-        const form = formTaskCreate.value;
-        // Подготавливаем данные в формате TaskStore
+        const form = formTaskCreate.value
         const taskData: TaskStore = {
             name: form.name,
             description: bbCodeConvert.convertToBBCode(form.description || ''),
             person: form.person.name,
             person_phone: form.person.phone,
-            problem_type_id: form.problemType?.value || 0,
-            problem_id: form.problem?.value || null,
-            priority_id: form.priority?.value || 0,
+            problem_type_id: form.problemType?.value ?? 0,
+            problem_id: form.problem?.value ?? null,
+            priority_id: form.priority?.value ?? 0,
             files: form.files,
             document_number: form.document.number,
             document_cost: form.document.cost ? Number(form.document.cost) : null,
@@ -267,17 +256,17 @@ const taskCreateSubmit = async () => {
             one_c_link: form.oneC.link,
             site_link: form.site.link,
             site_browser: form.site.browser,
-            site_os: form.site.os
-        };
-        const formData = Tasks.collectFormDataTaskCreate(taskData);
-        await Tasks.store(formData);
+            site_os: form.site.os,
+        }
+        const formData = Tasks.collectFormDataTaskCreate(taskData)
+        await Tasks.store(formData)
         toast.success('Обращение создано успешно')
         formTaskCreate.value = getEmptyForm()
-        isSubmit.value = false
     } catch (error) {
-        console.error('Ошибка:', error);
-        // Можно добавить обработку ошибок, например, показать уведомление
-        toast.error('Произошла ошибка')
+        // Ошибки API уже показывает интерсептор axios — не дублируем тост.
+        console.error('Ошибка создания обращения:', error)
+    } finally {
+        isSubmit.value = false
     }
 }
 </script>

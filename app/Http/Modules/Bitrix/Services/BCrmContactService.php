@@ -57,7 +57,7 @@ class BCrmContactService extends BWebHookConstructor
             'COMPANY_ID' => Auth::user()->b_company_id,
             'OPENED' => 'Y',
             'EXPORT' => 'Y',
-            'ASSIGNED_BY_ID' => self::CREATED_BY_USER,
+            'ASSIGNED_BY_ID' => $this->createdByUser,
             'PHONE' => $personPhone,
         ];
         $this->setBodyData(['fields' => $fields]);

@@ -1,11 +1,11 @@
 import {API} from "@/services";
-import {User, UserCreateForm, UserEditForm, UserQueryParams} from "@/types";
+import {User, UserCreateForm, UserEditForm, UserListResponse, UserQueryParams} from "@/types";
 
 export const Users = {
-    getList: async (queryParams?: UserQueryParams): Promise<User[]> => {
+    getList: async (queryParams?: UserQueryParams): Promise<UserListResponse> => {
         const response = await API.users.getList(queryParams);
 
-        return response.data.data;
+        return response.data;
     },
     store: async (data: UserCreateForm): Promise<User> => {
         if (!data.roles) {

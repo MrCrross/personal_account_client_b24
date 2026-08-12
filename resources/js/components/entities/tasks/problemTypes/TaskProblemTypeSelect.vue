@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import {ref, onMounted, watch} from 'vue'
 import {BaseSelect} from '@/components'
-import type {ProblemType} from "@/types";
-import {TaskProblemTypes} from "@/features";
-import {SelectOption} from "@/types";
+import {TaskProblemTypes} from "@/features"
+import type {SelectOption} from "@/types"
 
 interface Props {
-    modelValue?: number | string | null
+    modelValue?: SelectOption | null
     placeholder?: string
     disabled?: boolean
-    data?: ProblemType[] | undefined
 }
 
 interface Emits {
-    (e: 'update:modelValue', value: number | string | null): void
+    (e: 'update:modelValue', value: SelectOption | null): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -27,11 +25,10 @@ const emit = defineEmits<Emits>()
 const options = ref<SelectOption[]>([])
 const isLoading = ref(false)
 
-// Загрузка типов проблем
 const loadProblemTypes = async () => {
     try {
         isLoading.value = true
-        options.value = await TaskProblemTypes.getOptions();
+        options.value = await TaskProblemTypes.getOptions()
     } catch (error) {
         console.error('Ошибка загрузки типов проблем:', error)
         options.value = []
@@ -40,12 +37,11 @@ const loadProblemTypes = async () => {
     }
 }
 
-// Загружаем данные при монтировании
 onMounted(() => {
     loadProblemTypes()
 })
 
-// Можно добавить обновление при изменении пропсов, если нужно
+// Если родитель разблокировал селект и опций нет — подгружаем
 watch(() => props.disabled, (newValue) => {
     if (!newValue && options.value.length === 0) {
         loadProblemTypes()
@@ -64,7 +60,3 @@ watch(() => props.disabled, (newValue) => {
         />
     </div>
 </template>
-
-<style scoped>
-
-</style>

@@ -3,6 +3,7 @@
 namespace App\Http\Modules\Tasks\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Modules\Tasks\Requests\TaskMessageStoreRequest;
 use App\Http\Modules\Tasks\Requests\TasksListFilterRequest;
 use App\Http\Modules\Tasks\Requests\TaskStoreRequest;
 use App\Http\Modules\Tasks\Services\TasksService;
@@ -63,9 +64,6 @@ class TasksController extends Controller
      *     "name": "Тестовый пользователь"
      * }
      * }
-     * @param int $id
-     * @param TasksService $tasksService
-     * @return JsonResponse
      */
     public function getById(
         int $id,
@@ -85,10 +83,6 @@ class TasksController extends Controller
      * Получить список задач пользователя
      *
      * Возвращается массив объектов /api/tasks/{id}
-     *
-     * @param TasksListFilterRequest $request
-     * @param TasksService $tasksService
-     * @return JsonResponse
      */
     public function getList(
         TasksListFilterRequest $request,
@@ -116,6 +110,52 @@ class TasksController extends Controller
         TasksService $tasksService
     ): JsonResponse {
         return response()->json($tasksService->store($request));
+    }
+
+    /**
+     * Добавить сообщение в переписку обращения
+     *
+     * Сообщение сохраняется локально и отправляется комментарием в задачу Битрикса.
+     * Вложения (files) загружаются в Битрикс-Диск и прикрепляются к комментарию;
+     * локально храним только их ID, а сами файлы резолвим из Битрикса.
+     *
+     * @response {
+     *  "id": 1,
+     *  "text": "Текст сообщения",
+     *  "files": [
+     *      {
+     *          "id": 123,
+     *          "name": "screenshot.png",
+     *          "is_image": true,
+     *          "url": "https://lk.example/tasks/disk-file/123"
+     *      }
+     *  ],
+     *  "author": {
+     *      "id": 1,
+     *      "name": "Тестовый пользователь"
+     *  },
+     *  "created_at": "2025-09-10 12:00:00"
+     * }
+     */
+    public function storeMessage(
+        int $id,
+        TaskMessageStoreRequest $request,
+        TasksService $tasksService
+    ): JsonResponse {
+        $message = $tasksService->addMessage(
+            $id,
+            $request->validated()['text'] ?? '',
+            $request->file('files') ?? []
+        );
+
+        if ($message === null) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Обращение не найдено',
+            ], 404);
+        }
+
+        return response()->json($message);
     }
 
     /**

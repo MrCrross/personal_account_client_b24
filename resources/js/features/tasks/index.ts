@@ -1,14 +1,30 @@
 import {API} from "@/services";
-import {Task, TaskQueryParams, TaskStore} from "@/types";
+import {Task, TaskMessage, TaskQueryParams, TasksResponse, TaskStore} from "@/types";
 
 export const Tasks = {
-    getList: async (queryParams?: TaskQueryParams): Promise<Task[]> => {
+    getList: async (queryParams?: TaskQueryParams): Promise<TasksResponse> => {
         const response = await API.tasks.tasks.getList(queryParams);
 
-        return response.data.data;
+        return response.data;
+    },
+    getById: async (id: number): Promise<Task> => {
+        const response = await API.tasks.tasks.getById(id);
+
+        return response.data;
     },
     store: async (formData: FormData) => {
         await API.tasks.tasks.store(formData);
+    },
+    sendMessage: async (id: number, text: string, files: File[] = []): Promise<TaskMessage> => {
+        const formData = new FormData();
+        formData.append('text', text);
+        files.forEach((file, index) => {
+            formData.append(`files[${index}]`, file);
+        });
+
+        const response = await API.tasks.tasks.sendMessage(id, formData);
+
+        return response.data;
     },
     collectFormDataTaskCreate: (data: TaskStore): FormData => {
         const formData = new FormData();
