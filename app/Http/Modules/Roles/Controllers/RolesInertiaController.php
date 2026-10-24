@@ -24,11 +24,4 @@ class RolesInertiaController extends Controller
     {
         return Inertia::render('roles/RoleCreate', []);
     }
-
-    public function edit(int $roleId): Response
-    {
-        return Inertia::render('roles/RoleEdit', [
-            'role_id' => $roleId,
-        ]);
-    }
 }

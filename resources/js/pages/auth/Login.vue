@@ -13,7 +13,6 @@ import {useLocalStorage} from "@/composables";
 
 defineProps<{
     status?: string;
-    canResetPassword: boolean;
 }>();
 
 const isProcessing = ref(false);
@@ -72,7 +71,6 @@ const loginSubmit = async () => {
                 <div class="grid gap-2">
                     <div class="flex items-center justify-between">
                         <Label for="password">Пароль</Label>
-<!--                        <TextLink v-if="canResetPassword" :href="request()" class="text-sm" :tabindex="5"> Забыли пароль? </TextLink>-->
                     </div>
                     <Input
                         v-model="loginForm.password"

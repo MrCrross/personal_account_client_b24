@@ -24,11 +24,4 @@ class UsersInertiaController extends Controller
     {
         return Inertia::render('users/UserCreate', []);
     }
-
-    public function edit(int $userId): Response
-    {
-        return Inertia::render('users/UserEdit', [
-            'user_id' => $userId,
-        ]);
-    }
 }

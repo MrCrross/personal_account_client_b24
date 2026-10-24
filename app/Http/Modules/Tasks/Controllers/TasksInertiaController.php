@@ -38,17 +38,6 @@ class TasksInertiaController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(
-        int $id,
-    ): Response|RedirectResponse {
-        return Inertia::render('tasks/Edit', [
-            'taskId' => $id,
-        ]);
-    }
-
-    /**
      * Отдать содержимое вложения обращения (маркер [DISK FILE ID=nXXX]) стримом.
      * Под auth:web — грузится напрямую тегами <img>/<a> с сессионной кукой.
      */

@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import ProfileController from '@/actions/App/Http/Modules/Settings/Controllers/ProfileController';
 import { edit } from '@/routes/profile';
-// import { send } from '@/routes/verification';
 import { Form, Head, usePage } from '@inertiajs/vue3';
 import {InputError, HeadingSmall, Button, Input, Label,} from '@/components';
 import { AppLayout, SettingsLayout } from '@/layouts';
 import { type BreadcrumbItem } from '@/types';
-
-interface Props {
-    mustVerifyEmail: boolean;
-    status?: string;
-}
-
-defineProps<Props>();
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -62,23 +54,6 @@ const user = page.props.auth.user;
                         />
                         <InputError class="mt-2" :message="errors.email" />
                     </div>
-
-<!--                    <div v-if="mustVerifyEmail && !user.email_verified_at">-->
-<!--                        <p class="-mt-4 text-sm text-muted-foreground">-->
-<!--                            Your email address is unverified.-->
-<!--                            <Link-->
-<!--                                :href="send()"-->
-<!--                                as="button"-->
-<!--                                class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"-->
-<!--                            >-->
-<!--                                Click here to resend the verification email.-->
-<!--                            </Link>-->
-<!--                        </p>-->
-
-<!--                        <div v-if="status === 'verification-link-sent'" class="mt-2 text-sm font-medium text-green-600">-->
-<!--                            A new verification link has been sent to your email address.-->
-<!--                        </div>-->
-<!--                    </div>-->
 
                     <div class="flex items-center gap-4">
                         <Button :disabled="processing">Save</Button>
