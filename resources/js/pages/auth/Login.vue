@@ -42,7 +42,7 @@ const loginSubmit = async () => {
 </script>
 
 <template>
-    <AuthLayout title="Личный кабинет" description="Войдите в систему FlashFormat">
+    <AuthLayout title="Личный кабинет" description="Войдите в личный кабинет">
         <Head title="Вход" />
 
         <form

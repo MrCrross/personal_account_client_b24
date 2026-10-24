@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class BDiskService extends BWebHookConstructor
 {
-    private const STORAGE_ID = 344; // БОТ ФЛЕШ-ФОРМАТ
+    private const STORAGE_ID = 344; // Хранилище бота на Диске Bitrix24
 
     /**
      * @param  array  $files  - массив UploadFile

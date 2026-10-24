@@ -1,7 +1,7 @@
 {
     "name": "laravel/vue-starter-kit",
     "type": "project",
-    "description": "Personal Account Client Flash Format",
+    "description": "Personal Account Client",
     "keywords": [
         "laravel",
         "framework"

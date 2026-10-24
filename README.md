@@ -4,11 +4,11 @@
 
 **Сценарий:** клиент создаёт обращение в ЛК (тип проблемы, приоритет, описание, вложения) → в Bitrix24 от имени бота создаётся задача, файлы загружаются на Диск и прикрепляются к задаче, первый комментарий с деталями обращения пишется в задачу, в Telegram уходит уведомление о новом обращении. Дальнейшая переписка по обращению синхронизируется как комментарии задачи Bitrix24. Статус, результат и история обращения читаются из тех же данных.
 
-**Стек:** Laravel 13 (PHP 8.5) + Vue 3.5 через Inertia v2.1, Wayfinder для типизированных route-хелперов. Подробные конвенции — в `CLAUDE.md` (корень, `app/CLAUDE.md`, `resources/js/CLAUDE.md`).
+**Стек:** Laravel 13 (PHP 8.5) + Vue 3.5 через Inertia v3, Wayfinder для типизированных route-хелперов. Подробные конвенции — в `CLAUDE.md` (корень, `app/CLAUDE.md`, `resources/js/CLAUDE.md`).
 
 ## Установка
 
-Требования: PHP 8.5, Composer, Node.js 22, **pnpm** (версия — в `package.json` → `packageManager`, проще всего через `corepack enable`) — не npm/yarn (`pnpm-lock.yaml` — источник правды), MySQL. Либо только Docker — см. «Запуск в Docker» ниже.
+Требования: PHP 8.5, Composer, Node.js 24, **pnpm** (версия — в `package.json` → `packageManager`, проще всего через `corepack enable`) — не npm/yarn (`pnpm-lock.yaml` — источник правды), MySQL. Либо только Docker — см. «Запуск в Docker» ниже.
 
 ```bash
 composer install
@@ -37,9 +37,18 @@ pnpm dev                      # либо `composer run dev` — поднимае
 
 Полный список pnpm/composer-команд (typecheck, lint, build, pint, pest) — в корневом `CLAUDE.md`.
 
+### Юридические страницы (обязательно перед запуском)
+
+Тексты политик лежат в репозитории с **заглушками вместо реквизитов** — перед выкладкой их нужно заполнить данными своей компании (оператора персональных данных):
+
+- `resources/js/pages/policies/Confidential.vue` — политика конфиденциальности (`/policies/confidential`);
+- `resources/js/pages/policies/Cookies.vue` — согласие на использование cookie (`/policies/cookies`).
+
+Заменить все плейсхолдеры в квадратных скобках — `[НАЗВАНИЕ КОМПАНИИ]`, `[ИНН]`, `[ОГРН]`, `[ИНДЕКС]`, `[РЕГИОН]`, `[ГОРОД]`, `[УЛИЦА, ДОМ]` — и адрес сайта `https://example.com/`. Проверить, что ничего не осталось: `grep -rn "\[НАЗВАНИЕ\|\[ИНН\]\|\[ОГРН\]\|\[ИНДЕКС\]\|\[РЕГИОН\]\|\[ГОРОД\]\|\[УЛИЦА\|example.com" resources/js/pages/policies`. Сам текст политик — типовой; его соответствие 152-ФЗ и фактическим процессам компании стоит согласовать с юристом.
+
 ### Запуск в Docker
 
-PHP и Node на хосте не нужны: `docker/compose.yaml` поднимает MySQL 8.0, приложение (`php artisan serve`) и Vite с HMR на одном образе PHP 8.5 + Node 22 + pnpm (`docker/php/Dockerfile`).
+PHP и Node на хосте не нужны: `docker/compose.yaml` поднимает MySQL 8.0, приложение (`php artisan serve`) и Vite с HMR на одном образе PHP 8.5 + Node 24 + pnpm (`docker/php/Dockerfile`).
 
 ```bash
 cp .env.example .env
@@ -53,7 +62,7 @@ docker compose -f docker/compose.yaml up -d
 
 - Приложение — http://localhost:8000, Vite — `:5173`, MySQL снаружи — `localhost:3307` (`root` / `root`, база `ff_ts_lk`).
 - Команды — внутри контейнеров: `docker compose -f docker/compose.yaml exec app vendor/bin/pest`, `… exec vite pnpm typecheck` и т.д.
-- `node_modules` лежит в именованном томе (нужны linux-бинарники esbuild/rollup/tailwind), поэтому `pnpm install` выполнять в контейнере `vite`, а не на хосте.
+- `node_modules` лежит в именованном томе (нужны linux-бинарники esbuild/rolldown/tailwind), поэтому `pnpm install` выполнять в контейнере `vite`, а не на хосте.
 
 ## Bitrix24
 
@@ -66,7 +75,7 @@ REST-вызовы к порталу (`app/Http/Wrappers/BWebHookConstructor.php`
 | Право (как называется в Bitrix24)     | Зачем нужно                                                             |
 |----------------------------------------|--------------------------------------------------------------------------|
 | **CRM** (`crm`)                        | `crm.contact.add` — создание контакта клиента при первом обращении.      |
-| **Задачи** (`tasks`, новое REST API)    | `tasks.task.add`, `tasks.task.files.attach` — создание задачи и прикрепление файлов. |
+| **Задачи** (`tasks`, новое REST API)    | `tasks.task.add`, `tasks.task.files.attach`, `tasks.task.update` — создание задачи, прикрепление файлов, редактирование обращения клиентом. |
 | **Задачи** (`task`, старое REST API)    | `task.commentitem.add` — первый и последующие комментарии в задаче от бота. |
 | **Диск** (`disk`)                       | `disk.storage.uploadfile` (загрузка вложений), `disk.attachedObject.get` / `disk.file.get` (получение ссылки на скачивание). |
 

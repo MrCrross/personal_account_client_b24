@@ -9,7 +9,7 @@ use function Knuckles\Scribe\Config\{removeStrategies, configureStrategy};
 
 return [
     // The HTML <title> for the generated documentation.
-    'title' => 'Flash Format Technical Support Personal Account to Bitrix24 API Документация',
+    'title' => 'Technical Support Personal Account to Bitrix24 API Документация',
 
     // A short description of your API. Will be included in the docs webpage, Postman collection and OpenAPI spec.
     'description' => 'API позволяет создавать задачи в Битрикс24 по форме обращения клиента.',
