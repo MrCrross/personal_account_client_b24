@@ -2,12 +2,12 @@
 import { Button, Checkbox, Input, Label } from '@/components';
 import { AuthLayout } from '@/layouts';
 import { Head, router } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
+import { LoaderCircle } from '@lucide/vue';
 import { ref } from 'vue';
 import { API } from "@/services";
 import { APIResponse, JwtToken, LoginFormInput} from "@/types";
 import { AxiosResponse } from "axios";
-import { LogIn } from "lucide-vue-next";
+import { LogIn } from "@lucide/vue";
 import {TokenManager} from "@/lib/TokenManager";
 import {useLocalStorage} from "@/composables";
 

@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import {AppLayout} from "@/layouts";
 import {Head, Link} from "@inertiajs/vue3";
-import {ArrowLeft, LoaderCircle} from "lucide-vue-next";
+import {ArrowLeft, LoaderCircle} from "@lucide/vue";
 import {onMounted, ref, Ref} from "vue";
 import {Button, Label, TaskDetails} from "@/components";
 import {list} from "@/routes/tasks";

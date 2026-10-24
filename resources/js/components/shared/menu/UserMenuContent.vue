@@ -4,7 +4,7 @@ import { DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-me
 import { logout } from '@/routes';
 import type { User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
-import { LogOut } from 'lucide-vue-next';
+import { LogOut } from '@lucide/vue';
 
 interface Props {
     user: User;

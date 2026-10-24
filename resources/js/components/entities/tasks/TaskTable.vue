@@ -61,21 +61,26 @@
 
 <script setup lang="ts">
 import {Badge, BadgePriority, Button, DataTable} from "@/components";
-import {Eye} from 'lucide-vue-next'
+import {Eye} from '@lucide/vue'
 import {Task, TableColumn} from "@/types";
-import {router} from "@inertiajs/vue3";
+import {router, usePage} from "@inertiajs/vue3";
 import {show} from "@/routes/tasks";
 import {useDateFormat} from "@/composables";
+import {computed} from "vue";
 
 const formatDate = useDateFormat()
+const page = usePage()
+// Номер задачи в Битрикс показываем только администраторам
+const isAdmin = computed<boolean>(() => page.props.auth.permissions.includes('tasks_all_users'))
 
 interface Props {
     tasks: Task[]
 }
 defineProps<Props>()
 
-const columns: TableColumn[] = [
+const columns = computed<TableColumn[]>(() => [
     { key: 'id', label: 'ID', sortable: true, width: '80px' },
+    ...(isAdmin.value ? [{ key: 'b_id', label: 'Битрикс ID', sortable: true, width: '110px' }] : []),
     { key: 'title', label: 'Название', sortable: true },
     { key: 'status', label: 'Статус', sortable: true },
     { key: 'priority', label: 'Приоритет', slot: true, },
@@ -84,7 +89,7 @@ const columns: TableColumn[] = [
     { key: 'created_at', label: 'Дата создания', sortable: true, align: 'center' },
     { key: 'deadline', label: 'Дедлайн', slot: true, },
     { key: 'actions', label: '', align: 'center' },
-];
+]);
 
 const openTask = (task: Task) => {
     router.visit(show(task.id).url)

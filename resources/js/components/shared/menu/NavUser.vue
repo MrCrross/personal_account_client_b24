@@ -3,7 +3,7 @@ import UserInfo from '@/components/shared/menu/UserInfo.vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { usePage } from '@inertiajs/vue3';
-import { ChevronsUpDown } from 'lucide-vue-next';
+import { ChevronsUpDown } from '@lucide/vue';
 import UserMenuContent from './UserMenuContent.vue';
 
 const page = usePage();

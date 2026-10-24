@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { Badge } from '@/components'
-import { ChevronRightIcon } from 'lucide-vue-next'
+import { ChevronRightIcon } from '@lucide/vue'
 
 interface Props {
     item: any

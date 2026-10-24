@@ -42,6 +42,7 @@ class TasksRepository
 
                 return $query->where(function ($q) use ($like) {
                     $q->where('id', 'LIKE', $like)
+                        ->orWhere('b_task_id', 'LIKE', $like)
                         ->orWhereHas('bTask', function ($q2) use ($like) {
                             $q2->where('TITLE', 'LIKE', $like);
                         });
@@ -105,6 +106,7 @@ class TasksRepository
 
                 return $query->where(function ($q) use ($like) {
                     $q->where('id', 'LIKE', $like)
+                        ->orWhere('b_task_id', 'LIKE', $like)
                         ->orWhereHas('bTask', function ($q2) use ($like) {
                             $q2->where('TITLE', 'LIKE', $like);
                         });

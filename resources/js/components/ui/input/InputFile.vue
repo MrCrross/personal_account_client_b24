@@ -98,7 +98,7 @@ import type {HTMLAttributes} from 'vue'
 import {cn} from '@/lib/utils'
 import {ref, watch} from 'vue'
 import {Card, CardContent, Badge, Button} from '@/components'
-import {Upload, FileText, Image, Video, File, X} from 'lucide-vue-next'
+import {Upload, FileText, Image, Video, File, X} from '@lucide/vue'
 import { useToast } from '@/composables'
 
 interface FileWithPreview {

@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import {LoaderCircle} from 'lucide-vue-next'
+import {LoaderCircle} from '@lucide/vue'
 import {Autocomplete, Button, Checkbox, Input, RequiredMark, Label} from "@/components";
 import {computed, onMounted, Ref, ref} from "vue";
 import {Role, User, UserCreateForm} from "@/types";

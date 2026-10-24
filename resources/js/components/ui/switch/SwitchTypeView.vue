@@ -13,7 +13,7 @@
 
 <!-- ViewSwitchButton.vue -->
 <script setup lang="ts">
-import { LayoutGrid, Table } from 'lucide-vue-next'
+import { LayoutGrid, Table } from '@lucide/vue'
 import {SwitchButton} from '@/components'
 import {TypeViewData} from "@/types";
 

@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {Download, LoaderCircle} from "lucide-vue-next";
+import {Download, LoaderCircle} from "@lucide/vue";
 
 defineProps<{
     url: string

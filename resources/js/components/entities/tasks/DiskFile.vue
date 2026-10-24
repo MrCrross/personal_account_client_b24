@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {LoaderCircle, Paperclip} from "lucide-vue-next";
+import {LoaderCircle, Paperclip} from "@lucide/vue";
 import type {TaskDiskFile} from "@/types";
 import {useModalStore} from "@/store";
 import ImagePreviewModal from "./ImagePreviewModal.vue";

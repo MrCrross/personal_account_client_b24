@@ -20,7 +20,7 @@ import {
     DateRangePickerRoot,
     DateRangePickerTrigger
 } from 'reka-ui'
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { Calendar, ChevronLeft, ChevronRight } from '@lucide/vue'
 
 interface Props {
     modelValue?: DateRange,

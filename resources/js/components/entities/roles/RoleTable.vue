@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import {Badge, Button, DataTable, PerPageSelector, RoleForm, RoleListFilter} from "@/components";
-import {LoaderCircle, PencilIcon} from 'lucide-vue-next'
+import {LoaderCircle, PencilIcon} from '@lucide/vue'
 import {Role, RoleQueryParams, SelectOption, TableColumn} from "@/types";
 import {computed, onMounted, ref} from "vue";
 import {Roles} from "@/features";

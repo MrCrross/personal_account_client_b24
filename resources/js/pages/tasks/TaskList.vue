@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import {AppLayout, TasksLayout} from "@/layouts";
 import {Head} from "@inertiajs/vue3";
-import {LoaderCircle} from "lucide-vue-next";
+import {LoaderCircle} from "@lucide/vue";
 import {onMounted, Ref, ref} from "vue";
 import {
     TaskCard,

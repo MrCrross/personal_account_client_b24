@@ -159,7 +159,7 @@ import {
     Heading3,
     Eraser,
     Pilcrow
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const props = defineProps<{
     defaultValue?: string

@@ -1,7 +1,7 @@
 <!-- components/Toast/ToastItem.vue -->
 <script setup lang="ts">
 import { ToastClose, ToastDescription, ToastRoot, ToastTitle } from 'reka-ui'
-import { CheckCircle, Info, AlertCircle, AlertTriangle } from 'lucide-vue-next'
+import { CheckCircle, Info, AlertCircle, AlertTriangle } from '@lucide/vue'
 import type { ToastType } from '@/composables/components/useToast'
 
 const ToastTypeClasses: Record<ToastType, string> = {

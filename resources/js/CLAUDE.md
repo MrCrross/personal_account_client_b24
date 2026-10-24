@@ -4,21 +4,21 @@
 
 ## Stack
 
-- **Vue** 3.5.13 — `<script setup lang="ts">` везде
-- **TypeScript** 5.2 — `strict: true`
-- **Vite** 7 (плагины: `@vitejs/plugin-vue`, `@tailwindcss/vite`, `laravel-vite-plugin`, `@laravel/vite-plugin-wayfinder`)
-- **Tailwind CSS** 4.1 — `@theme inline` в CSS, без `tailwind.config.js`
-- **Pinia** 3 (setup-стиль)
-- **Inertia.js** v2.1 (`@inertiajs/vue3`) поверх Laravel
+- **Vue** 3.5 — `<script setup lang="ts">` везде
+- **TypeScript** 6.0 (TS 7 пока несовместим с vue-tsc и typescript-eslint) — `strict: true`
+- **Vite** 8 (rolldown) (плагины: `@vitejs/plugin-vue`, `@tailwindcss/vite`, `laravel-vite-plugin`, `@laravel/vite-plugin-wayfinder`)
+- **Tailwind CSS** 4.3 — `@theme inline` в CSS, без `tailwind.config.js`
+- **Pinia** 4 (setup-стиль)
+- **Inertia.js** v3 (`@inertiajs/vue3`) поверх Laravel
 - **Laravel Wayfinder** — генерация типизированных route-хелперов из Laravel-роутов
 - **shadcn-vue** UI (конфиг — `components.json`)
-- **reka-ui** 2.2 — headless-примитивы под капотом shadcn-vue
+- **reka-ui** 2.11 — headless-примитивы под капотом shadcn-vue
 - **Tiptap** 3 — Editor
-- **VueUse** 12 — composables
-- **axios** 1.11
-- **lucide-vue-next** — иконки
+- **VueUse** 15 — composables
+- **axios** 1.20
+- **@lucide/vue** — иконки
 - **vs-vue3-select** — селекты (типы прошиты shim'ом, см. ниже)
-- **Tooling**: ESLint 9 flat-config, Prettier 3, vue-tsc 2.2
+- **Tooling**: ESLint 10 flat-config, Prettier 3, vue-tsc 3
 
 ## Структура
 
@@ -115,7 +115,7 @@ resources/js/
 
 ## State management
 
-- **Pinia 3**, setup-стиль:
+- **Pinia 4**, setup-стиль:
   ```ts
   export const useModalStore = defineStore('modal', () => {
       const isOpen = ref(false)

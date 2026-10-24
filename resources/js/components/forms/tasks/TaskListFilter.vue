@@ -8,7 +8,7 @@
                 <CardContent>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                         <div class="md:col-span-2">
-                            <Label class="text-sm font-medium">Поиск (номер заказа или название)</Label>
+                            <Label class="text-sm font-medium">Поиск (номер обращения, номер в Битрикс или название)</Label>
                             <Input v-model="filterForm.search" placeholder="Например, 123 или часть названия"/>
                         </div>
                         <div>

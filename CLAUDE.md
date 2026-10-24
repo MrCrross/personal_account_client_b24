@@ -4,7 +4,7 @@
 
 ## Что это за проект
 
-Личный кабинет клиента: **Laravel 13** (PHP 8.5) + **Vue 3.5** через **Inertia v2.1**. Wayfinder генерирует типизированные route-хелперы из Laravel-роутов в TS.
+Личный кабинет клиента: **Laravel 13** (PHP 8.5) + **Vue 3.5** через **Inertia v3**. Wayfinder генерирует типизированные route-хелперы из Laravel-роутов в TS.
 
 Frontend живёт в `resources/js/`. Backend — в `app/`. Подробные конвенции для каждой части в **нестед** `CLAUDE.md` (Claude Code сам подгружает их, когда заходишь в соответствующую подпапку):
 
@@ -31,7 +31,7 @@ Frontend живёт в `resources/js/`. Backend — в `app/`. Подробны�
 
 ### Docker (`docker/`)
 
-Локальное окружение без PHP/Node на хосте: `docker/compose.yaml` — `mysql` (8.0, порт хоста `3307`), `app` (`php artisan serve`, `:8000`), `vite` (`pnpm dev`, `:5173`). Оба PHP-сервиса на одном образе `docker/php/Dockerfile` (PHP 8.5 + Node 22 + pnpm + composer), проект смонтирован в `/var/www`, `node_modules` — в именованном томе (linux-бинарники). В `.env` для docker: `DB_HOST=mysql`, `DB_PASSWORD=root`, `APP_URL=http://localhost:8000`.
+Локальное окружение без PHP/Node на хосте: `docker/compose.yaml` — `mysql` (8.0, порт хоста `3307`), `app` (`php artisan serve`, `:8000`), `vite` (`pnpm dev`, `:5173`). Оба PHP-сервиса на одном образе `docker/php/Dockerfile` (PHP 8.5 + Node 24 + pnpm + composer), проект смонтирован в `/var/www`, `node_modules` — в именованном томе (linux-бинарники). В `.env` для docker: `DB_HOST=mysql`, `DB_PASSWORD=root`, `APP_URL=http://localhost:8000`.
 
 Если на хосте нет PHP/Node, команды из таблицы выше запускать в контейнере:
 

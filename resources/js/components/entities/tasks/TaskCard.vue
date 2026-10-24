@@ -1,9 +1,18 @@
 <template>
-    <Card class="p-4 gap-3">
+    <Card
+        class="p-4 gap-3 cursor-pointer transition-colors hover:border-primary hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        role="link"
+        tabindex="0"
+        @click="handleViewDetails"
+        @keydown.enter="handleViewDetails"
+    >
         <div class="md:flex justify-between items-start">
             <div>
                 <h3 class="font-semibold text-lg">{{ task.title }}</h3>
-                <p class="text-sm text-gray-500">#{{ task.id }}</p>
+                <p class="text-sm text-gray-500">
+                    #{{ task.id }}
+                    <span v-if="isAdmin"> · Битрикс #{{ task.b_id }}</span>
+                </p>
                 <p class="text-sm text-gray-500" v-if="task.creator.id !== auth.user.id">Создатель: {{ task.creator.name }}</p>
             </div>
         </div>
@@ -12,7 +21,7 @@
             <Badge :variant="task.status.variant || 'default'">
                 {{ task.status?.name }}
             </Badge>
-            <Button type="button" variant="outline" size="sm" class="cursor-pointer" @click="handleViewDetails">
+            <Button type="button" variant="outline" size="sm" class="cursor-pointer" @click.stop="handleViewDetails">
                 <Eye class="w-4 h-4 mr-2"/>
                 Подробнее
             </Button>
@@ -45,7 +54,7 @@
 import type {Task} from '@/types';
 import {useBBCode, useDateFormat} from "@/composables";
 import {Badge, BadgePriority, Button, Card, EditorReadonly} from "@/components";
-import {Eye} from "lucide-vue-next";
+import {Eye} from "@lucide/vue";
 import {router, usePage} from "@inertiajs/vue3";
 import {show} from "@/routes/tasks";
 import {computed} from "vue";
@@ -54,6 +63,7 @@ const bbCodeConvert = useBBCode()
 const dateFormat = useDateFormat();
 const page = usePage();
 const auth = computed(() => page.props.auth);
+const isAdmin = computed(() => auth.value.permissions.includes('tasks_all_users'));
 
 const props = defineProps<{
     task: Task

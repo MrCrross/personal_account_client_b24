@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import {Badge, Button, DataTable, PerPageSelector, UserForm, UserListFilter} from "@/components";
-import {LoaderCircle, PencilIcon, UsersIcon} from 'lucide-vue-next'
+import {LoaderCircle, PencilIcon, UsersIcon} from '@lucide/vue'
 import {SelectOption, TableColumn, User, UserQueryParams} from "@/types";
 import {computed, onMounted, ref} from "vue";
 import {Users} from "@/features";

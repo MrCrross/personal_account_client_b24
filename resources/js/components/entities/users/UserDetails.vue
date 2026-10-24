@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import {Badge, Button, Card, CardContent, CardHeader, CardTitle, Label} from "@/components";
-import {PencilIcon} from "lucide-vue-next";
+import {PencilIcon} from "@lucide/vue";
 import {useDateFormat} from "@/composables";
 import type {User} from "@/types";
 

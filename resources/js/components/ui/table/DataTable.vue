@@ -114,7 +114,7 @@
 
 <script setup lang="ts">
 import {computed, ref, useSlots} from 'vue'
-import {ArrowUpIcon, ArrowDownIcon, LoaderCircle} from 'lucide-vue-next'
+import {ArrowUpIcon, ArrowDownIcon, LoaderCircle} from '@lucide/vue'
 import { cn } from '@/lib/utils'
 import {TableColumn} from "@/types";
 

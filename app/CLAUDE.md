@@ -5,7 +5,7 @@
 ## Stack
 
 - **Laravel 13** / **PHP 8.5**
-- **Inertia** v2.1 (рендер страниц через `Inertia::render`)
+- **Inertia** v3 (рендер страниц через `Inertia::render`)
 - **JWT** (`php-open-source-saver/jwt-auth`) — API-гард `auth:api`
 - **Spatie Permission** — роли/права (`$user->can('...')`)
 - **Scribe** — генерация API-доков из докблоков (`@group`, `@response`, см. скил `scribe-docblock-helper`)

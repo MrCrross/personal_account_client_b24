@@ -22,7 +22,7 @@
 </template>
 <script setup lang="ts">
 import {Separator, Heading, PanelMenu} from '@/components';
-import {Users, ShieldUser, NotebookTabs, ListPlus} from "lucide-vue-next";
+import {Users, ShieldUser, NotebookTabs, ListPlus} from "@lucide/vue";
 import {onMounted, Ref, ref} from "vue";
 import {usePage} from "@inertiajs/vue3";
 import {useBreadcrumbStore} from "@/store";

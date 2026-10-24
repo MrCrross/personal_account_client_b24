@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import {AppLayout, AdminLayout} from "@/layouts";
 import {Head, Link} from "@inertiajs/vue3";
-import {ArrowLeft, LoaderCircle} from "lucide-vue-next";
+import {ArrowLeft, LoaderCircle} from "@lucide/vue";
 import {onMounted, ref} from "vue";
 import {Button, Label, UserDetails, UserForm} from "@/components";
 import {list, view} from "@/routes/users";

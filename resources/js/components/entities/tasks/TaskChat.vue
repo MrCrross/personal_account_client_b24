@@ -88,7 +88,7 @@
 <script setup lang="ts">
 import type {TaskMessage} from '@/types'
 import {Button, Card, CardContent, CardHeader, CardTitle, DiskFile, Editor, EditorReadonly} from "@/components";
-import {LoaderCircle, Paperclip, X} from "lucide-vue-next";
+import {LoaderCircle, Paperclip, X} from "@lucide/vue";
 import {computed, ref} from "vue";
 import {Tasks as TasksFeature} from "@/features";
 import {useDateFormat, useToast} from "@/composables";

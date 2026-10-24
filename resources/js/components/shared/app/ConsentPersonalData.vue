@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ShieldCheckIcon } from 'lucide-vue-next'
+import { ShieldCheckIcon } from '@lucide/vue'
 import {Link} from "@inertiajs/vue3";
 
 interface Props {

@@ -2,8 +2,8 @@ FROM php:8.5-cli-bookworm
 
 # Node + pnpm в том же образе: vite-плагин wayfinder во время dev/build дёргает `php artisan`.
 # Версия pnpm — та же, что в package.json (packageManager)
-COPY --from=node:22-bookworm-slim /usr/local/bin/node /usr/local/bin/node
-COPY --from=node:22-bookworm-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node:24-bookworm-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:24-bookworm-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && npm install -g pnpm@12.10.1
 

@@ -6,7 +6,7 @@ import {
     AlertCircle,
     Info,
     Clock
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import {BadgeProps} from "@/types";
 import {Badge} from "@/components";
 
