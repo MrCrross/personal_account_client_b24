@@ -1,15 +1,40 @@
 <template>
     <div class="space-y-6">
         <!-- Заголовок -->
-        <div>
-            <h2 class="text-2xl font-bold text-foreground">{{ task.title }}</h2>
-            <p class="text-sm text-muted-foreground">
-                #{{ task.id }}
-                <span v-if="isAdmin"> · Битрикс #{{ task.b_id }}</span>
-            </p>
-            <p class="text-sm text-muted-foreground" v-if="task.creator.id !== auth.user.id">
-                Создатель: {{ task.creator.name }}
-            </p>
+        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-foreground">{{ task.title }}</h2>
+                <p class="text-sm text-muted-foreground">
+                    #{{ task.id }}
+                    <span v-if="isAdmin"> · Битрикс #{{ task.b_id }}</span>
+                </p>
+                <p class="text-sm text-muted-foreground" v-if="task.creator.id !== auth.user.id">
+                    Создатель: {{ task.creator.name }}
+                </p>
+            </div>
+
+            <!-- Редактирование: только создатель и пока задача не завершена (флаг считает бэк) -->
+            <Dialog v-if="task.can_edit" v-model:open="isEditOpen">
+                <DialogTrigger as-child>
+                    <Button type="button" variant="outline" size="sm" class="w-fit cursor-pointer">
+                        <Pencil class="mr-2 h-4 w-4" />
+                        Редактировать
+                    </Button>
+                </DialogTrigger>
+                <DialogScrollContent class="sm:max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Редактирование обращения</DialogTitle>
+                        <DialogDescription>
+                            Изменения сохранятся в задаче Битрикс24.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <TaskEditForm
+                        :task="task"
+                        @saved="handleSaved"
+                        @cancel="isEditOpen = false"
+                    />
+                </DialogScrollContent>
+            </Dialog>
         </div>
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -157,10 +182,31 @@
 
 <script setup lang="ts">
 import type {Task, TaskMessage} from '@/types'
-import {Badge, BadgePriority, Card, CardContent, CardHeader, CardTitle, DiskFile, EditorReadonly, Label, TaskChat, TaskResultText} from "@/components";
+import {
+    Badge,
+    BadgePriority,
+    Button,
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    Dialog,
+    DialogDescription,
+    DialogHeader,
+    DialogScrollContent,
+    DialogTitle,
+    DialogTrigger,
+    DiskFile,
+    EditorReadonly,
+    Label,
+    TaskChat,
+    TaskEditForm,
+    TaskResultText
+} from "@/components";
 import {useBBCode, useDateFormat} from "@/composables";
 import {usePage} from "@inertiajs/vue3";
-import {computed} from "vue";
+import {Pencil} from "@lucide/vue";
+import {computed, ref} from "vue";
 
 const bbCodeConvert = useBBCode()
 const page = usePage();
@@ -173,7 +219,15 @@ defineProps<{
 
 const emit = defineEmits<{
     (e: 'sent', message: TaskMessage): void
+    (e: 'updated'): void
 }>()
+
+const isEditOpen = ref<boolean>(false)
+
+const handleSaved = () => {
+    isEditOpen.value = false
+    emit('updated')
+}
 
 const dateFormat = useDateFormat();
 </script>

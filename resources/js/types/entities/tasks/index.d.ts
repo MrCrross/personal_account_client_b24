@@ -77,6 +77,8 @@ export interface Task {
     results: TaskResult[]
     messages: TaskMessage[]
     creator: Creator
+    // Создатель может менять название, описание и приоритет, пока задача не завершена
+    can_edit: boolean
 }
 
 // Параметры запроса — имена полей соответствуют тому, что читает бэкенд (TasksListFilterRequest)
@@ -96,6 +98,13 @@ export interface TasksResponse {
     data: Task[]
     has_more: boolean
     current_page: number
+}
+
+// Редактирование обращения создателем; description — BBCode, как при создании
+export interface TaskUpdate {
+    name: string
+    description: string
+    priority_id: number
 }
 
 export interface TaskStore {

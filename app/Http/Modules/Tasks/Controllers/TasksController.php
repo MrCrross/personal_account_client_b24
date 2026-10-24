@@ -3,12 +3,14 @@
 namespace App\Http\Modules\Tasks\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Modules\Tasks\Enums\TaskUpdateResultEnum;
 use App\Http\Modules\Tasks\Requests\TaskMessageStoreRequest;
 use App\Http\Modules\Tasks\Requests\TasksListFilterRequest;
 use App\Http\Modules\Tasks\Requests\TaskStoreRequest;
+use App\Http\Modules\Tasks\Requests\TaskUpdateRequest;
 use App\Http\Modules\Tasks\Services\TasksService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -159,11 +161,43 @@ class TasksController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Изменить обращение
+     *
+     * Доступно только создателю обращения и только пока задача не завершена.
+     * Название, описание (BBCode) и приоритет обновляются в задаче Битрикса.
+     * После успеха актуальные данные — через /api/tasks/{id}.
+     *
+     * @response 204 {}
+     * @response 404 {"error": true, "message": "Обращение не найдено"}
+     * @response 422 {"error": true, "message": "Завершённое обращение нельзя изменить"}
+     * @response 502 {"error": true, "message": "Не удалось сохранить изменения в Битрикс24, попробуйте позже"}
      */
-    public function update(Request $request, string $id)
-    {
-        //
+    public function update(
+        int $id,
+        TaskUpdateRequest $request,
+        TasksService $tasksService
+    ): JsonResponse|Response {
+        $result = $tasksService->update(
+            $id,
+            Auth::user()->getAuthIdentifier(),
+            $request->validated()
+        );
+
+        return match ($result) {
+            TaskUpdateResultEnum::UPDATED => response()->noContent(),
+            TaskUpdateResultEnum::NOT_FOUND => response()->json([
+                'error' => true,
+                'message' => 'Обращение не найдено',
+            ], 404),
+            TaskUpdateResultEnum::CLOSED => response()->json([
+                'error' => true,
+                'message' => 'Завершённое обращение нельзя изменить',
+            ], 422),
+            TaskUpdateResultEnum::BITRIX_FAILED => response()->json([
+                'error' => true,
+                'message' => 'Не удалось сохранить изменения в Битрикс24, попробуйте позже',
+            ], 502),
+        };
     }
 
     /**

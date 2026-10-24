@@ -2,6 +2,7 @@
 
 namespace App\Http\Modules\Tasks\Resources;
 
+use App\Http\Modules\Tasks\Enums\TaskStatusesEnum;
 use App\Http\Modules\Tasks\Resources\Priorities\TasksPriorityResource;
 use App\Http\Modules\Tasks\Resources\Statuses\TasksStatusResource;
 use App\Http\Modules\Tasks\Support\DiskFileTextParser;
@@ -118,6 +119,9 @@ class TaskResource extends JsonResource
                 'id' => $this->user_creator_id,
                 'name' => $this->creator->name,
             ],
+            // Редактировать название/описание/приоритет может только создатель, пока задача не завершена
+            'can_edit' => (int) $this->user_creator_id === (int) $request->user()?->getAuthIdentifier()
+                && (int) $this->bTask->STATUS !== TaskStatusesEnum::COMPLETED->value,
             // Сообщения грузятся только в детальной выборке — в списке guard вернёт []
             'messages' => $this->relationLoaded('messages')
                 ? $this->messages->sortBy('id')->values()->map(function ($message) {

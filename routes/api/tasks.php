@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('', [TasksController::class, 'getList']);
 Route::get('/{id}', [TasksController::class, 'getById'])->whereNumber('id');
 Route::post('', [TasksController::class, 'store']);
+Route::patch('/{id}', [TasksController::class, 'update'])->whereNumber('id');
 Route::post('/{id}/messages', [TasksController::class, 'storeMessage'])->whereNumber('id');
 
 Route::prefix('/statuses')->group(callback: function () {

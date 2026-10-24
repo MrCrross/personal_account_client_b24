@@ -12,6 +12,7 @@ class TaskDictionary
         'problem_type' => 'тип проблемы',
         'problem' => 'проблема',
         'priority' => 'приоритет',
+        'priority_id' => 'приоритет',
         'document_number' => 'номер договора',
         'document_cost' => 'сумма договора',
         'document_contractor' => 'контрагент',

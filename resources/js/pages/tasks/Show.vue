@@ -15,7 +15,7 @@
             </div>
 
             <div v-else-if="task" class="space-y-6">
-                <TaskDetails :task="task" @sent="handleMessageSent" />
+                <TaskDetails :task="task" @sent="handleMessageSent" @updated="refreshTask" />
             </div>
 
             <div v-else class="py-12 text-center">
@@ -59,7 +59,16 @@ const loadTask = async () => {
     }
 }
 
-const handleMessageSent = (message: TaskMessage) => {
+// После редактирования подтягиваем актуальные данные из Битрикса без спиннера на всю страницу
+const refreshTask = async () => {
+    try {
+        task.value = await TasksFeature.getById(props.taskId)
+    } catch {
+        // Тост покажет интерсептор; оставляем прежние данные
+    }
+}
+
+const handleMessageSent =(message: TaskMessage) => {
     if (task.value) {
         task.value.messages.push(message)
     }

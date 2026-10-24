@@ -1,5 +1,5 @@
 import {API} from "@/services";
-import {Task, TaskMessage, TaskQueryParams, TasksResponse, TaskStore} from "@/types";
+import {Task, TaskMessage, TaskQueryParams, TasksResponse, TaskStore, TaskUpdate} from "@/types";
 
 export const Tasks = {
     getList: async (queryParams?: TaskQueryParams): Promise<TasksResponse> => {
@@ -14,6 +14,9 @@ export const Tasks = {
     },
     store: async (formData: FormData) => {
         await API.tasks.tasks.store(formData);
+    },
+    update: async (id: number, data: TaskUpdate) => {
+        await API.tasks.tasks.update(id, data);
     },
     sendMessage: async (id: number, text: string, files: File[] = []): Promise<TaskMessage> => {
         const formData = new FormData();

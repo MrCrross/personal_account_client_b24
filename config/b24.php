@@ -28,6 +28,7 @@ return [
             'get' => 'tasks.task.list',
             'getById' => 'tasks.task.get',
             'create' => 'tasks.task.add',
+            'update' => 'tasks.task.update',
             'files' => [
                 'attach' => 'tasks.task.files.attach',
             ],

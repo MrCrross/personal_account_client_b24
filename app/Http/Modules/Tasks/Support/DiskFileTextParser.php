@@ -27,6 +27,23 @@ class DiskFileTextParser
     }
 
     /**
+     * Маркеры вложений как есть (с префиксом n или без — в Битриксе это разные ID),
+     * чтобы перенести их в отредактированный текст.
+     *
+     * @return string[]
+     */
+    public static function extractMarkers(?string $text): array
+    {
+        if (empty($text)) {
+            return [];
+        }
+
+        preg_match_all(self::MARKER, $text, $matches);
+
+        return array_values(array_unique($matches[0]));
+    }
+
+    /**
      * Текст без маркеров вложений — для рендера описания через редактор.
      */
     public static function strip(?string $text): string

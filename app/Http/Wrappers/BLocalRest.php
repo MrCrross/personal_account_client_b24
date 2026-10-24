@@ -45,6 +45,7 @@ class BLocalRest
     {
         return match ($method) {
             'tasks.task.add' => $this->addTask($body['fields'] ?? []),
+            'tasks.task.update' => $this->updateTask((int) $body['taskId'], $body['fields'] ?? []),
             'tasks.task.files.attach' => $this->attachFileToTask((int) $body['taskId'], (int) $body['fileId']),
             'task.commentitem.add' => $this->addComment((int) $body['TASKID'], $body['FIELDS'] ?? []),
             'crm.contact.add' => $this->addContact($body['fields'] ?? []),
@@ -101,6 +102,28 @@ class BLocalRest
         ]);
 
         return ['result' => ['task' => ['id' => $id]]];
+    }
+
+    /**
+     * Меняет только поля, которые реально шлёт BTasksService::update; изменения от имени бота.
+     */
+    private function updateTask(int $taskId, array $fields): array
+    {
+        $task = BTask::query()->select('ID')->where('ID', '=', $taskId)->first();
+        if ($task === null) {
+            return $this->notFound();
+        }
+
+        $now = Carbon::now()->toDateTimeString();
+        // toBase(): у b_tasks нет updated_at, а Eloquent-update дописал бы его сам
+        BTask::query()->where('ID', '=', $taskId)->toBase()->update([
+            ...array_intersect_key($fields, array_flip(['TITLE', 'DESCRIPTION', 'PRIORITY'])),
+            'CHANGED_BY' => config('b24.createdByUser'),
+            'CHANGED_DATE' => $now,
+            'ACTIVITY_DATE' => $now,
+        ]);
+
+        return ['result' => ['task' => ['id' => $taskId]]];
     }
 
     private function attachFileToTask(int $taskId, int $fileId): array

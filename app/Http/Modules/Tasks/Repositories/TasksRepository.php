@@ -209,6 +209,19 @@ class TasksRepository
             ->first();
     }
 
+    /**
+     * Обращение создателя с полями задачи Битрикса, нужными для редактирования.
+     */
+    public static function getForUpdateByCreator(int $taskId, int $creatorId): ?Task
+    {
+        return Task::query()
+            ->select('id', 'b_task_id', 'user_creator_id')
+            ->with('bTask:ID,STATUS,DESCRIPTION')
+            ->where('id', '=', $taskId)
+            ->where('user_creator_id', '=', $creatorId)
+            ->first();
+    }
+
     public static function store(array $fields): int
     {
         return Task::query()->insertGetId($fields);

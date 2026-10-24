@@ -7,6 +7,7 @@ use App\Http\Wrappers\BWebHookConstructor;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class BTasksService extends BWebHookConstructor
 {
@@ -39,6 +40,27 @@ class BTasksService extends BWebHookConstructor
         $response = $this->execute();
 
         return $response['result']['task']['id'];
+    }
+
+    /**
+     * Обновить поля задачи в Битриксе (TITLE, DESCRIPTION, PRIORITY и т.п.).
+     * Данные задачи живут в Битриксе, поэтому ошибку не глушим — бросаем исключение.
+     *
+     * @throws ConnectionException
+     * @throws RuntimeException
+     */
+    public function update(int $bTaskId, array $fields): void
+    {
+        $this->setRoute('tasks.update');
+        $this->setBodyData([
+            'taskId' => $bTaskId,
+            'fields' => $fields,
+        ]);
+        $response = $this->execute();
+
+        if (! is_array($response) || isset($response['error']) || ! isset($response['result'])) {
+            throw new RuntimeException("Битрикс24 не обновил задачу {$bTaskId}");
+        }
     }
 
     public function uploadFiles(

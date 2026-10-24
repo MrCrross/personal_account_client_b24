@@ -8,6 +8,8 @@ use App\Http\Modules\Bitrix\Services\BDiskService;
 use App\Http\Modules\Bitrix\Services\BTasksService;
 use App\Http\Modules\Bitrix\Services\VacationScheduleService;
 use App\Http\Modules\Notifications\Services\TelegramNotifyService;
+use App\Http\Modules\Tasks\Enums\TaskStatusesEnum;
+use App\Http\Modules\Tasks\Enums\TaskUpdateResultEnum;
 use App\Http\Modules\Tasks\Repositories\TaskMessagesRepository;
 use App\Http\Modules\Tasks\Repositories\TasksProblemTypesRepository;
 use App\Http\Modules\Tasks\Repositories\TasksRepository;
@@ -15,10 +17,12 @@ use App\Http\Modules\Tasks\Requests\TaskStoreRequest;
 use App\Http\Modules\Tasks\Resources\TaskMessageResource;
 use App\Http\Modules\Tasks\Resources\TaskResource;
 use App\Http\Modules\Tasks\Resources\TasksPaginateCollection;
+use App\Http\Modules\Tasks\Support\DiskFileTextParser;
 use App\Models\Tasks\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 
 class TasksService
@@ -158,13 +162,54 @@ class TasksService
     }
 
     /**
+     * Редактирование обращения его создателем: название, описание, приоритет.
+     *
+     * Эти поля живут в задаче Битрикса (локально не храним), поэтому изменения уходят только
+     * через tasks.task.update — при ошибке Битрикса сохранять нечего, возвращаем BITRIX_FAILED.
+     * Завершённую задачу менять нельзя.
+     */
+    public function update(int $taskId, int $creatorId, array $data): TaskUpdateResultEnum
+    {
+        $task = TasksRepository::getForUpdateByCreator($taskId, $creatorId);
+        if (empty($task) || $task->bTask === null) {
+            return TaskUpdateResultEnum::NOT_FOUND;
+        }
+
+        if ((int) $task->bTask->STATUS === TaskStatusesEnum::COMPLETED->value) {
+            return TaskUpdateResultEnum::CLOSED;
+        }
+
+        // Клиент редактирует описание без маркеров вложений (TaskResource их вырезает) —
+        // возвращаем их, чтобы файлы описания не потерялись в Битриксе
+        $description = trim($data['description']);
+        $markers = DiskFileTextParser::extractMarkers($task->bTask->DESCRIPTION);
+        if (! empty($markers)) {
+            $description .= "\n".implode("\n", $markers);
+        }
+
+        try {
+            (new BTasksService)->update($task->b_task_id, [
+                'TITLE' => $data['name'],
+                'DESCRIPTION' => $description,
+                'PRIORITY' => $data['priority_id'],
+            ]);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return TaskUpdateResultEnum::BITRIX_FAILED;
+        }
+
+        return TaskUpdateResultEnum::UPDATED;
+    }
+
+    /**
      * Сохраняет сообщение переписки локально и отправляет его копией
      * в чат (комментарий) задачи Битрикса. Чат из Битрикса не читаем.
      *
      * Вложения не дублируем у себя: загружаем их в Битрикс-Диск, прикрепляем к комментарию,
      * а локально храним только ID файлов — сами вложения резолвим из Битрикса по запросу.
      *
-     * @param  array<int, \Illuminate\Http\UploadedFile>  $files
+     * @param  array<int, UploadedFile>  $files
      *
      * Возвращает null, если обращение не найдено или недоступно пользователю.
      */
