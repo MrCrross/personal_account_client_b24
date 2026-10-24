@@ -7,11 +7,14 @@ use Illuminate\Contracts\Pagination\Paginator;
 
 class UsersRepository
 {
-    /**
-     * @return Paginator
-     */
-    public static function getList(): Paginator
-    {
+    public static function getList(
+        ?string $search,
+        ?int $roleId,
+        ?int $companyId,
+        ?string $dateStart,
+        ?string $dateEnd,
+        int $perPage = 15
+    ): Paginator {
         return User::query()
             ->select(
                 'id',
@@ -22,15 +25,34 @@ class UsersRepository
                 'telegram_chat_id',
                 'created_at',
             )
-            ->with(['bGroup', 'bCompany','roles'])
+            ->with(['bGroup', 'bCompany', 'roles'])
+            ->when(! empty($search), function ($query) use ($search) {
+                $like = '%'.addcslashes($search, '%_\\').'%';
+
+                return $query->where(function ($q) use ($like) {
+                    $q->where('id', 'LIKE', $like)
+                        ->orWhere('name', 'LIKE', $like)
+                        ->orWhere('email', 'LIKE', $like);
+                });
+            })
+            ->when(! empty($roleId), function ($query) use ($roleId) {
+                return $query->whereHas('roles', function ($q) use ($roleId) {
+                    $q->whereKey($roleId);
+                });
+            })
+            ->when(! empty($companyId), function ($query) use ($companyId) {
+                return $query->where('b_company_id', '=', $companyId);
+            })
+            ->when(! empty($dateStart), function ($query) use ($dateStart) {
+                return $query->whereDate('created_at', '>=', $dateStart);
+            })
+            ->when(! empty($dateEnd), function ($query) use ($dateEnd) {
+                return $query->whereDate('created_at', '<=', $dateEnd);
+            })
             ->orderBy('id')
-            ->simplePaginate();
+            ->simplePaginate($perPage);
     }
 
-    /**
-     * @param string $userId
-     * @return User|null
-     */
     public static function getById(
         string $userId
     ): ?User {
@@ -39,10 +61,6 @@ class UsersRepository
             ->first();
     }
 
-    /**
-     * @param string $email
-     * @return User|null
-     */
     public static function getByEmail(
         string $email
     ): ?User {
@@ -51,10 +69,6 @@ class UsersRepository
             ->first();
     }
 
-    /**
-     * @param string $tgChatId
-     * @return User|null
-     */
     public static function getByTgChatId(
         string $tgChatId
     ): ?User {
@@ -68,11 +82,6 @@ class UsersRepository
         return User::query()->create($fields);
     }
 
-    /**
-     * @param int $userId
-     * @param array $fields
-     * @return void
-     */
     public static function update(
         int $userId,
         array $fields

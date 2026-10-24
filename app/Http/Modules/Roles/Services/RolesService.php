@@ -5,21 +5,40 @@ namespace App\Http\Modules\Roles\Services;
 use App\Http\Modules\Roles\Repositories\PermissionsRepository;
 use App\Http\Modules\Roles\Repositories\RolesRepository;
 use App\Http\Modules\Roles\Resources\RoleResource;
+use App\Http\Modules\Roles\Resources\RolesCollection;
 use App\Http\Modules\Roles\Resources\RolesPaginateCollection;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RolesService
 {
-    public function getAll(): RolesPaginateCollection
+    public function getAll(): RolesCollection
     {
-        return new RolesPaginateCollection(RolesRepository::getAll());
+        return new RolesCollection(RolesRepository::getAll());
     }
 
-    public function getList (
+    public function getList(
         Request $request
     ): RolesPaginateCollection {
-        return new RolesPaginateCollection(RolesRepository::getList());
+        $rolesList = RolesRepository::getList(
+            search: $request->query('search'),
+            guardName: $request->query('guard_name'),
+            permissionId: $request->query('permission_id'),
+            perPage: $request->query('per_page', 15)
+        );
+
+        return new RolesPaginateCollection($rolesList);
+    }
+
+    public function getById(int $roleId): ?RoleResource
+    {
+        $role = RolesRepository::getById($roleId);
+        if (empty($role)) {
+            return null;
+        }
+        $role->load('permissions');
+
+        return new RoleResource($role);
     }
 
     public function store(Request $request): RoleResource

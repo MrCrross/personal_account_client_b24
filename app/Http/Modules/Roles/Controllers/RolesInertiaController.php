@@ -8,41 +8,27 @@ use Inertia\Response;
 
 class RolesInertiaController extends Controller
 {
-    /**
-     * @return Response
-     */
     public function index(): Response
     {
         return Inertia::render('roles/RoleList', []);
     }
 
-    /**
-     * @param int $roleId
-     * @return Response
-     */
-    public function view(int $roleId): Response
+    public function view(int $id): Response
     {
         return Inertia::render('roles/RoleView', [
-            'role_id' => $roleId
+            'roleId' => $id,
         ]);
     }
 
-    /**
-     * @return Response
-     */
     public function create(): Response
     {
         return Inertia::render('roles/RoleCreate', []);
     }
 
-    /**
-     * @param int $roleId
-     * @return Response
-     */
     public function edit(int $roleId): Response
     {
         return Inertia::render('roles/RoleEdit', [
-            'role_id' => $roleId
+            'role_id' => $roleId,
         ]);
     }
 }

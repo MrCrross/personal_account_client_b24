@@ -2,7 +2,6 @@
 
 namespace App\Http\Modules\Users\Services;
 
-use App\Http\Modules\Bitrix\Repositories\BCrmCompanyRepository;
 use App\Http\Modules\Roles\Repositories\RolesRepository;
 use App\Http\Modules\Users\Repositories\UsersRepository;
 use App\Http\Modules\Users\Resources\UserResource;
@@ -12,10 +11,30 @@ use Illuminate\Support\Facades\Hash;
 
 class UsersService
 {
-    public function getList (
+    public function getList(
         Request $request
     ): UsersPaginateCollection {
-        return new UsersPaginateCollection(UsersRepository::getList());
+        $usersList = UsersRepository::getList(
+            search: $request->query('search'),
+            roleId: $request->query('role_id'),
+            companyId: $request->query('b_company_id'),
+            dateStart: $request->query('date_start'),
+            dateEnd: $request->query('date_end'),
+            perPage: $request->query('per_page', 15)
+        );
+
+        return new UsersPaginateCollection($usersList);
+    }
+
+    public function getById(int $userId): ?UserResource
+    {
+        $user = UsersRepository::getById($userId);
+        if (empty($user)) {
+            return null;
+        }
+        $user->load(['bGroup', 'bCompany', 'roles']);
+
+        return new UserResource($user);
     }
 
     public function store(Request $request): UserResource

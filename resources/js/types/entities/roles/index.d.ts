@@ -32,3 +32,17 @@ export type RolesResponse = {
 export type PermissionsResponse = {
     data: Permission[]
 }
+
+export type RoleListResponse = {
+    data: Role[]
+    has_more: boolean
+    current_page: number
+}
+
+export interface RoleQueryParams {
+    page?: number
+    per_page?: number
+    search?: string
+    guard_name?: string
+    permission_id?: number
+}

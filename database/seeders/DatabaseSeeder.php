@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
         ];
         if (config('app.debug')) {
             $calls[] = TaskTestSeeder::class;
+            $calls[] = UsersTestSeeder::class;
         }
         $this->call($calls);
     }

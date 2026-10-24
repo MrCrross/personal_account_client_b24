@@ -13,10 +13,10 @@ class UsersInertiaController extends Controller
         return Inertia::render('users/UserList', []);
     }
 
-    public function view(int $userId): Response
+    public function view(int $id): Response
     {
         return Inertia::render('users/UserView', [
-            'user_id' => $userId
+            'userId' => $id,
         ]);
     }
 
@@ -28,7 +28,7 @@ class UsersInertiaController extends Controller
     public function edit(int $userId): Response
     {
         return Inertia::render('users/UserEdit', [
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
     }
 }

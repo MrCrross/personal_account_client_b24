@@ -25,8 +25,8 @@ export interface User {
     telegram_chat_id?: string | null,
     theme?: Appearance,
     roles?: Role[],
-    created_at?: Date,
-    updated_at?: Date|null,
+    created_at?: string,
+    updated_at?: string|null,
 }
 
 export type UserCreateForm = {
@@ -58,6 +58,11 @@ export type UserListResponse = {
 export interface UserQueryParams {
     page?: number
     per_page?: number
+    search?: string
+    role_id?: number
+    b_company_id?: number
+    date_start?: string
+    date_end?: string
 }
 
 export type Creator = {

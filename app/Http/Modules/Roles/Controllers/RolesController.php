@@ -3,11 +3,11 @@
 namespace App\Http\Modules\Roles\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Modules\Roles\Requests\RolesListFilterRequest;
 use App\Http\Modules\Roles\Requests\RolesStoreRequest;
 use App\Http\Modules\Roles\Requests\RolesUpdateRequest;
 use App\Http\Modules\Roles\Services\RolesService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 
 /**
@@ -36,13 +36,9 @@ class RolesController extends Controller
      *         }
      *     }
      * }
-     *
-     * @param Request $request
-     * @param RolesService $rolesService
-     * @return JsonResponse
      */
     public function index(
-        Request $request,
+        RolesListFilterRequest $request,
         RolesService $rolesService
     ): JsonResponse {
         return response()->json($rolesService->getList($request));
@@ -69,9 +65,6 @@ class RolesController extends Controller
      *          }
      *      }
      *  }
-     *
-     * @param RolesService $rolesService
-     * @return JsonResponse
      */
     public function getAll(
         RolesService $rolesService,
@@ -92,8 +85,6 @@ class RolesController extends Controller
      *         }
      *     ]
      * }
-     *
-     * @return JsonResponse
      */
     public function getPermissions(): JsonResponse
     {
@@ -108,8 +99,37 @@ class RolesController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $permissions
+            'data' => $permissions,
         ]);
+    }
+
+    /**
+     * Получить роль
+     *
+     * @response {
+     *    "id":1,
+     *    "name":"role",
+     *    "title":"Роль",
+     *    "guard_name":"api",
+     *    "created_at":"2025-01-01 01:01:01",
+     *    "permissions":[
+     *       {
+     *         "id":1,
+     *         "name":"permission",
+     *         "title":"Право доступа"
+     *       }
+     *    ]
+     * }
+     * @response 404 {"message": "Not Found"}
+     */
+    public function getById(
+        int $id,
+        RolesService $rolesService
+    ): JsonResponse {
+        $role = $rolesService->getById($id);
+        abort_if($role === null, 404);
+
+        return response()->json($role);
     }
 
     /**
@@ -129,10 +149,6 @@ class RolesController extends Controller
      *       }
      *    ]
      * }
-     *
-     * @param RolesStoreRequest $request
-     * @param RolesService $rolesService
-     * @return JsonResponse
      */
     public function store(
         RolesStoreRequest $request,
@@ -158,11 +174,6 @@ class RolesController extends Controller
      *        }
      *     ]
      *  }
-     *
-     * @param int $roleId
-     * @param RolesUpdateRequest $request
-     * @param RolesService $rolesService
-     * @return JsonResponse
      */
     public function update(
         int $roleId,

@@ -7,6 +7,11 @@ export const Users = {
 
         return response.data;
     },
+    getById: async (userId: number): Promise<User> => {
+        const response = await API.users.getById(userId);
+
+        return response.data;
+    },
     store: async (data: UserCreateForm): Promise<User> => {
         if (!data.roles) {
             data.roles = null

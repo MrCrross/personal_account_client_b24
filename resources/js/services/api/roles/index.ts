@@ -1,5 +1,5 @@
 import ApiService from "@/services/service";
-import {PermissionsResponse, RolesResponse, Role,} from "@/types";
+import {PermissionsResponse, RolesResponse, Role, RoleListResponse, RoleQueryParams} from "@/types";
 import {AxiosResponse} from "axios";
 
 export default {
@@ -9,8 +9,8 @@ export default {
     getPermissions: async (): Promise<AxiosResponse<PermissionsResponse>> => {
         return await ApiService.get('/api/roles/permissions');
     },
-    getList: async (): Promise<AxiosResponse<RolesResponse>> => {
-        return await ApiService.get('/api/roles');
+    getList: async (queryParams?: RoleQueryParams): Promise<AxiosResponse<RoleListResponse>> => {
+        return await ApiService.get('/api/roles', queryParams);
     },
     getById: async (roleId: number): Promise<AxiosResponse<Role>> => {
         return await ApiService.get('/api/roles/' + roleId);

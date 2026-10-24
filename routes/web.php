@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 Route::get('/', function () {
     if (Auth::hasUser()) {
@@ -27,7 +28,9 @@ Route::middleware('auth:web')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/', function () {
             return Inertia::render('AdminPanel', []);
-        })->name('admin');
+        })
+            ->middleware(PermissionMiddleware::using(['users_module', 'roles_module']))
+            ->name('admin');
         Route::prefix('users')
             ->middleware('can:users_module')
             ->group(base_path('routes/web/users.php'));
@@ -36,4 +39,4 @@ Route::middleware('auth:web')->group(function () {
             ->group(base_path('routes/web/roles.php'));
     });
 });
-require __DIR__ . '/web/auth.php';
+require __DIR__.'/web/auth.php';

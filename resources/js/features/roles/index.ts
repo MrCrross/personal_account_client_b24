@@ -1,5 +1,5 @@
 import {API} from "@/services";
-import {Permission, Role, RoleForm} from "@/types";
+import {Permission, Role, RoleForm, RoleListResponse, RoleQueryParams} from "@/types";
 
 // Преобразование формы из UI в payload для бэкенда.
 // Не мутируем входной объект (он реактивен в компоненте).
@@ -21,10 +21,15 @@ export const Roles = {
 
         return response.data.data;
     },
-    getList: async (): Promise<Role[]> => {
-        const response = await API.roles.getList();
+    getList: async (queryParams?: RoleQueryParams): Promise<RoleListResponse> => {
+        const response = await API.roles.getList(queryParams);
 
-        return response.data.data;
+        return response.data;
+    },
+    getById: async (roleId: number): Promise<Role> => {
+        const response = await API.roles.getById(roleId);
+
+        return response.data;
     },
     store: async (data: RoleForm): Promise<Role> => {
         const jsonData = JSON.stringify(buildPayload(data));
