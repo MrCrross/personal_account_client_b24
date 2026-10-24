@@ -3,10 +3,13 @@
 namespace App\Models\Tasks;
 
 use App\Models\PrefixedModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TaskProblemType extends PrefixedModel
 {
+    use HasFactory;
+
     public $table = 'task_problem_types';
 
     protected $fillable = [
@@ -16,9 +19,6 @@ class TaskProblemType extends PrefixedModel
         'updated_at',
     ];
 
-    /**
-     * @return HasMany
-     */
     public function problems(): HasMany
     {
         return $this->hasMany(
@@ -28,9 +28,6 @@ class TaskProblemType extends PrefixedModel
         )->select('id', 'problem_type_id', 'name');
     }
 
-    /**
-     * @return HasMany
-     */
     public function performers(): HasMany
     {
         return $this->hasMany(
@@ -40,9 +37,6 @@ class TaskProblemType extends PrefixedModel
         )->select('id', 'problem_type_id', 'b_user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function watchers(): HasMany
     {
         return $this->hasMany(

@@ -20,11 +20,14 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'root',
             'email' => 'root@root.com',
+            // Группа и компания из тестовых данных TaskTestSeeder (b_sonet_group / b_crm_company)
+            'b_group_id' => 12,
+            'b_company_id' => 3943,
         ]);
         $calls = [
             TaskStatusSeeder::class,
             TaskProblemTypesSeeder::class,
-            PermissionSeeder::class
+            PermissionSeeder::class,
         ];
         if (config('app.debug')) {
             $calls[] = TaskTestSeeder::class;

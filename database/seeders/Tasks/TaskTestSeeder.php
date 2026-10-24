@@ -10,10 +10,10 @@ use App\Models\Bitrix24\Iblock\BIblockElement;
 use App\Models\Bitrix24\Iblock\BIblockElementProperty;
 use App\Models\Bitrix24\Iblock\BIblockProperty;
 use App\Models\Bitrix24\Task\BTask;
+use App\Models\Bitrix24\Task\BTasksResult;
 use App\Models\Tasks\Task;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class TaskTestSeeder extends Seeder
@@ -27,18 +27,18 @@ class TaskTestSeeder extends Seeder
             [
                 'ID' => 1,
                 'NAME' => 'Иван',
-                'LAST_NAME' => 'Иванов'
+                'LAST_NAME' => 'Иванов',
             ],
             [
                 'ID' => 2,
                 'NAME' => 'Владимир',
-                'LAST_NAME' => 'Путянов'
+                'LAST_NAME' => 'Путянов',
             ],
             [
                 'ID' => 3,
                 'NAME' => 'Самали',
-                'LAST_NAME' => 'Калашников'
-            ]
+                'LAST_NAME' => 'Калашников',
+            ],
         ];
 
         $b_sonet_group = [
@@ -47,7 +47,7 @@ class TaskTestSeeder extends Seeder
                 'NAME' => 'Техническая поддержка',
                 'DATE_CREATE' => Carbon::yesterday()->toDateTimeString(),
                 'ACTIVE' => 'Y',
-            ]
+            ],
         ];
 
         $b_crm_company = [
@@ -56,14 +56,14 @@ class TaskTestSeeder extends Seeder
                 'TITLE' => 'Флеш-формат ООО',
                 'SEARCH_CONTENT' => '3298 Флеш-формат ООО Лидия Банщикова 83952567150 73952567150 3952567150 952567150 52567150 2567150 567150 67150 7150 150 Информационные технологии логин и пароль не выбрано Услуги',
                 'DATE_CREATE' => Carbon::parse('11.02.2020 08:57:59')->toDateTimeString(),
-                'OPENED' => 'Y'
+                'OPENED' => 'Y',
             ],
             [
                 'ID' => 3943,
                 'TITLE' => 'ФФ(внутренний)',
                 'SEARCH_CONTENT' => '3943 ФФ(внутренний) Роман Черепанов Информационные технологии НЕ УДАЛЯТЬ ВСЯ ИНФА ПО ФФ !!!!!!!!!!!!!!! логин и пароль не выбрано Услуги 2',
                 'DATE_CREATE' => Carbon::parse('15.05.2023 16:20:05')->toDateTimeString(),
-                'OPENED' => 'Y'
+                'OPENED' => 'Y',
             ],
         ];
 
@@ -71,8 +71,8 @@ class TaskTestSeeder extends Seeder
             [
                 'ID' => 151,
                 'NAME' => 'График отпусков',
-                'ACTIVE' => 'Y'
-            ]
+                'ACTIVE' => 'Y',
+            ],
         ];
 
         $b_iblock_property = [
@@ -82,7 +82,7 @@ class TaskTestSeeder extends Seeder
                 'NAME' => 'Сотрудник',
                 'CODE' => 'USER',
                 'USER_TYPE' => 'UserID',
-                'ACTIVE' => 'Y'
+                'ACTIVE' => 'Y',
             ],
             [
                 'ID' => 910,
@@ -90,7 +90,7 @@ class TaskTestSeeder extends Seeder
                 'NAME' => 'Начало отпуска',
                 'CODE' => 'DATE_START',
                 'USER_TYPE' => 'Date',
-                'ACTIVE' => 'Y'
+                'ACTIVE' => 'Y',
             ],
             [
                 'ID' => 911,
@@ -98,7 +98,7 @@ class TaskTestSeeder extends Seeder
                 'NAME' => 'Окончание отпуска',
                 'CODE' => 'DATE_END',
                 'USER_TYPE' => 'Date',
-                'ACTIVE' => 'Y'
+                'ACTIVE' => 'Y',
             ],
         ];
 
@@ -107,19 +107,19 @@ class TaskTestSeeder extends Seeder
                 'ID' => 21116,
                 'DATE_CREATE' => Carbon::parse('16.07.2025 09:41:34')->toDateTimeString(),
                 'IBLOCK_ID' => 151,
-                'ACTIVE' => 'Y'
+                'ACTIVE' => 'Y',
             ],
             [
                 'ID' => 21200,
                 'DATE_CREATE' => Carbon::parse('01.09.2025 10:42:51')->toDateTimeString(),
                 'IBLOCK_ID' => 151,
-                'ACTIVE' => 'Y'
+                'ACTIVE' => 'Y',
             ],
             [
                 'ID' => 21204,
                 'DATE_CREATE' => Carbon::parse('05.09.2025 15:45:19')->toDateTimeString(),
                 'IBLOCK_ID' => 151,
-                'ACTIVE' => 'Y'
+                'ACTIVE' => 'Y',
             ],
         ];
 
@@ -128,57 +128,57 @@ class TaskTestSeeder extends Seeder
                 'ID' => 49628,
                 'IBLOCK_ELEMENT_ID' => 21116,
                 'IBLOCK_PROPERTY_ID' => 909,
-                'VALUE' => 198
+                'VALUE' => 198,
             ],
             [
                 'ID' => 49629,
                 'IBLOCK_ELEMENT_ID' => 21116,
                 'IBLOCK_PROPERTY_ID' => 910,
-                'VALUE' => '2025-08-01'
+                'VALUE' => '2025-08-01',
             ],
             [
                 'ID' => 49630,
                 'IBLOCK_ELEMENT_ID' => 21116,
                 'IBLOCK_PROPERTY_ID' => 911,
-                'VALUE' => '2025-08-08'
+                'VALUE' => '2025-08-08',
             ],
 
             [
                 'ID' => 49649,
                 'IBLOCK_ELEMENT_ID' => 21200,
                 'IBLOCK_PROPERTY_ID' => 909,
-                'VALUE' => 635
+                'VALUE' => 635,
             ],
             [
                 'ID' => 49650,
                 'IBLOCK_ELEMENT_ID' => 21200,
                 'IBLOCK_PROPERTY_ID' => 910,
-                'VALUE' => '2025-09-22'
+                'VALUE' => '2025-09-22',
             ],
             [
                 'ID' => 49651,
                 'IBLOCK_ELEMENT_ID' => 21200,
                 'IBLOCK_PROPERTY_ID' => 911,
-                'VALUE' => '2025-10-04'
+                'VALUE' => '2025-10-04',
             ],
 
             [
                 'ID' => 49654,
                 'IBLOCK_ELEMENT_ID' => 21204,
                 'IBLOCK_PROPERTY_ID' => 909,
-                'VALUE' => 658
+                'VALUE' => 658,
             ],
             [
                 'ID' => 49655,
                 'IBLOCK_ELEMENT_ID' => 21204,
                 'IBLOCK_PROPERTY_ID' => 910,
-                'VALUE' => '2025-09-29'
+                'VALUE' => '2025-09-29',
             ],
             [
                 'ID' => 49656,
                 'IBLOCK_ELEMENT_ID' => 21204,
                 'IBLOCK_PROPERTY_ID' => 911,
-                'VALUE' => '2025-10-12'
+                'VALUE' => '2025-10-12',
             ],
         ];
 
@@ -230,7 +230,7 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 122,
-                'IS_REGULAR' => 0
+                'IS_REGULAR' => 0,
             ],
             [
                 'ID' => 10150,
@@ -279,7 +279,7 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 0,
-                'IS_REGULAR' => 0
+                'IS_REGULAR' => 0,
             ],
             [
                 'ID' => 11922,
@@ -328,7 +328,7 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 120,
-                'IS_REGULAR' => 0
+                'IS_REGULAR' => 0,
             ],
             [
                 'ID' => 11924,
@@ -377,7 +377,7 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 120,
-                'IS_REGULAR' => 0
+                'IS_REGULAR' => 0,
             ],
             [
                 'ID' => 11926,
@@ -426,7 +426,7 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 120,
-                'IS_REGULAR' => 0
+                'IS_REGULAR' => 0,
             ],
             [
                 'ID' => 11938,
@@ -475,7 +475,7 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 120,
-                'IS_REGULAR' => 0
+                'IS_REGULAR' => 0,
             ],
             [
                 'ID' => 11974,
@@ -524,39 +524,49 @@ class TaskTestSeeder extends Seeder
                 'DEADLINE_COUNTED' => 0,
                 'MATCH_WORK_TIME' => 0,
                 'STAGE_ID' => 120,
-                'IS_REGULAR' => 0
-            ]
+                'IS_REGULAR' => 0,
+            ],
+        ];
+
+        $b_tasks_result = [
+            [
+                'ID' => 1,
+                'TASK_ID' => 9706,
+                'CREATED_BY' => 1,
+                'CREATED_AT' => '2019-09-16 04:20:00',
+                'TEXT' => 'Системный блок подобран, счёт выставлен и отправлен клиенту.',
+            ],
         ];
 
         $ffTasks = [
             [
-                "person" => "Иван Иванович Иванов",
-                "person_phone" => "89999999999",
-                "b_task_id" => 9706,
-                "user_creator_id" => 1,
-                "problem_type_id" => 2,
+                'person' => 'Иван Иванович Иванов',
+                'person_phone' => '89999999999',
+                'b_task_id' => 9706,
+                'user_creator_id' => 1,
+                'problem_type_id' => 2,
             ],
             [
-                "person" => "Иван Иванович Иванов",
-                "person_phone" => "89999999999",
-                "b_task_id" => 10150,
-                "user_creator_id" => 1,
-                "problem_type_id" => 3,
+                'person' => 'Иван Иванович Иванов',
+                'person_phone' => '89999999999',
+                'b_task_id' => 10150,
+                'user_creator_id' => 1,
+                'problem_type_id' => 3,
             ],
             [
-                "person" => "Иван Иванович Иванов",
-                "person_phone" => "89999999999",
-                "b_task_id" => 11922,
-                "user_creator_id" => 1,
-                "problem_type_id" => 4,
+                'person' => 'Иван Иванович Иванов',
+                'person_phone' => '89999999999',
+                'b_task_id' => 11922,
+                'user_creator_id' => 1,
+                'problem_type_id' => 4,
             ],
         ];
         foreach ($ffTasks as $key => $value) {
             $ffTasks[$key]['created_at'] = Carbon::now()->subWeek()->addDays($key)->toDateTimeString();
         }
 
-        if (!Schema::hasTable('b_user') && config('app.debug')) {
-            DB::unprepared(file_get_contents(public_path('/sql/b_tables_create.sql')));
+        // Таблицы b_* создаёт миграция create_local_bitrix_mirror_tables; заполняем их, только если пусты
+        if (config('app.debug') && Schema::hasTable('b_user') && BUser::query()->doesntExist()) {
             BUser::insert($b_user);
             BSonetGroup::insert($b_sonet_group);
             BTask::insert($b_tasks);
@@ -565,6 +575,7 @@ class TaskTestSeeder extends Seeder
             BIblockElement::insert($b_iblock_element);
             BIblockProperty::insert($b_iblock_property);
             BIblockElementProperty::insert($b_iblock_element_property);
+            BTasksResult::insert($b_tasks_result);
         }
 
         Task::insert($ffTasks);

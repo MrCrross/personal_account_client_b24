@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Read-only доступ к привязкам файлов Битрикс-Диска (b_disk_attached_object).
  *
- * Таблица — внешняя (Bitrix), в проектных миграциях не создаётся: в тестах с :memory:
- * и на локали без зеркала её нет — методы отдают [].
+ * Таблица — внешняя (Bitrix). Локально её создаёт миграция create_local_bitrix_mirror_tables,
+ * а в тестах с :memory: её нет — тогда методы отдают [].
  */
 class BDiskAttachedObjectsRepository
 {

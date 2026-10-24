@@ -3,12 +3,13 @@
 namespace Database\Factories;
 
 use App\Http\Modules\Settings\Enums\ProfileThemeEnum;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -28,20 +29,11 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
-            'b_group_id' => 12,
-            'b_company_id' => 3943,
+            // ID группы/компании в Битриксе — произвольные; нужные значения передавать явно
+            'b_group_id' => fake()->numberBetween(1, 99999),
+            'b_company_id' => fake()->numberBetween(1, 99999),
             'theme' => ProfileThemeEnum::Light,
             'remember_token' => Str::random(10),
         ];
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
     }
 }

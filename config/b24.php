@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // webhook — REST через B24_WEBHOOK; database — без вебхука, локальные таблицы b_*
+    // (только для разработки, см. App\Http\Wrappers\BLocalRest)
+    'driver' => env('B24_DRIVER', 'webhook'),
     'webhook' => env('B24_WEBHOOK'),
     'createdByUser' => env('B24_CREATED_BY_USER', 1),
     'default' => [

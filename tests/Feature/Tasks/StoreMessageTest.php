@@ -15,7 +15,12 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     // Стабильный URL вебхука, чтобы запрос к Битриксу формировался корректно
-    config(['b24.webhook' => 'https://bitrix.test/rest/1/token/']);
+    // ID бота в Битриксе зависит от окружения — задаём свой, а не берём из .env
+    $this->botUserId = fake()->numberBetween(1, 99999);
+    config([
+        'b24.webhook' => 'https://bitrix.test/rest/1/token/',
+        'b24.createdByUser' => $this->botUserId,
+    ]);
     // Префикс таблиц проект добавляет вручную в моделях, у соединения он пустой —
     // поэтому в assertDatabase* передаём фактическое имя таблицы
     $this->messagesTable = (new TaskMessage)->getTable();
@@ -44,7 +49,7 @@ it('сохраняет сообщение локально и отправляе
     ]);
 });
 
-it('отправляет в Битрикс комментарий от бота (312) с префиксом имени клиента', function () {
+it('отправляет в Битрикс комментарий от бота с префиксом имени клиента', function () {
     Http::fake(['*' => Http::response(['result' => 1], 200)]);
 
     $user = User::factory()->create(['name' => 'Пётр Клиентов']);
@@ -56,7 +61,7 @@ it('отправляет в Битрикс комментарий от бота 
 
     Http::assertSent(function ($request) {
         return str_contains($request->url(), 'task.commentitem.add')
-            && (int) $request['FIELDS']['AUTHOR_ID'] === 312
+            && (int) $request['FIELDS']['AUTHOR_ID'] === $this->botUserId
             && str_contains($request['FIELDS']['POST_MESSAGE'], 'Сообщение от Пётр Клиентов')
             && str_contains($request['FIELDS']['POST_MESSAGE'], 'Тестовое сообщение');
     });

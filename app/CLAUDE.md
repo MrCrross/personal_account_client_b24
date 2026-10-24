@@ -4,7 +4,7 @@
 
 ## Stack
 
-- **Laravel 12** / **PHP 8.4**
+- **Laravel 13** / **PHP 8.5**
 - **Inertia** v2.1 (рендер страниц через `Inertia::render`)
 - **JWT** (`php-open-source-saver/jwt-auth`) — API-гард `auth:api`
 - **Spatie Permission** — роли/права (`$user->can('...')`)
@@ -70,8 +70,9 @@ app/Http/Modules/<Module>/
 
 - **`app/Http/Wrappers/BWebHookConstructor.php`** — база. URL из `config('b24.webhook')` (env `B24_WEBHOOK`). Методы: `setRoute()`, `addFields()`, `setBodyData()`, `execute()`. `execute()` возвращает `$response->json()` при успехе, иначе сам `Response`.
 - **`config/b24.php`** — маппинг логических путей на REST-методы (`tasks.create` → `tasks.task.add`, `tasks.comments.add` → `task.commentitem.add`, ...).
-- **Bot-пользователь `312`** (`BWebHookConstructor::CREATED_BY_USER`) — от его имени создаются задачи/комментарии (у клиентов ЛК нет своих Bitrix-аккаунтов). Сообщения клиента уходят комментарием от бота с префиксом ФИО клиента.
-- **`b_*` модели** (`app/Models/Bitrix24/`) — read-only зеркала таблиц Bitrix. НЕ создаются миграциями проекта (внешние таблицы) — в тестах с `RefreshDatabase` их нет, код, который их трогает, надо мокать/обходить.
+- **Bot-пользователь** (`config('b24.createdByUser')`, env `B24_CREATED_BY_USER`; на бою — `312`) — от его имени создаются задачи/комментарии (у клиентов ЛК нет своих Bitrix-аккаунтов). Сообщения клиента уходят комментарием от бота с префиксом ФИО клиента.
+- **`b_*` модели** (`app/Models/Bitrix24/`) — read-only зеркала таблиц Bitrix, без префикса проекта. На бою это настоящие таблицы портала в той же БД. Для локальной разработки их создаёт миграция `create_local_bitrix_mirror_tables` (только недостающие таблицы, минимальный набор колонок; в `production`/`testing` пропускается через `shouldRun()`, `down()` ничего не удаляет), а наполняет `TaskTestSeeder` (при `APP_DEBUG`, если `b_user` пуст). Старый `public/sql/b_tables_create.sql` больше не используется. В тестах с `RefreshDatabase` таблиц `b_*` нет — код, который их трогает, надо мокать/обходить.
+- **Драйвер `B24_DRIVER`** (`config('b24.driver')`): `webhook` (по умолчанию) — REST через вебхук; `database` — без вебхука, для разработки без доступа к порталу. Переключение — в `BWebHookConstructor::execute()`/`download()`, сервисы модуля Bitrix о драйвере не знают. `App\Http\Wrappers\BLocalRest` эмулирует используемые REST-методы (`tasks.task.add`, `tasks.task.files.attach`, `task.commentitem.add`, `crm.contact.add`, `disk.storage.uploadfile`, `disk.attachedObject.get`, `disk.file.get`) записью/чтением `b_*`, ответы — в форме REST Bitrix24; файлы Диска — на диске `local` в `b24-local/disk/<ID>/<имя>`. **Новый REST-вызов → добавить его эмуляцию в `BLocalRest::call()`**, иначе в `database`-режиме будет `RuntimeException`. В `production` драйвер `database` бросает исключение. В тестах драйвер всегда `webhook` — его выставляет `tests/TestCase::setUp()` (тесты работают через `Http::fake()`).
 - **Resilience**: внешний вызов оборачивай в `try/catch (\Throwable)` + `report()`, чтобы падение Bitrix не теряло локальные данные. Пример — `TasksService::addMessage()`: сначала пытаемся отправить в Bitrix, при ошибке `b_comment_id = null`, но локально сообщение всё равно сохраняется.
 
 ## Уведомления (`Notifications`)
@@ -89,6 +90,7 @@ app/Http/Modules/<Module>/
 
 - Тесты идут в **`sqlite :memory:`** (phpunit.xml `<env>` переопределяет `.env` с MySQL). Проверено диагностикой `DB::connection()->getDatabaseName()`.
 - **`RefreshDatabase` ВЫКЛЮЧЕН глобально** (закомментирован в `tests/Pest.php`) → схемы в `:memory:` нет. Включай **пофайлово**: `uses(RefreshDatabase::class)` в своём тест-файле.
-- **Базовый фон: ~24 падающих стартеровых теста** (`Auth/*`, `Settings/ProfileUpdateTest`, `ExampleTest`) — это пред-существующая поломка (нет колонки `email_verified_at`, нет роутов `register`/`verification`/`password.*` — у проекта кастомный JWT-auth без них). НЕ твои; сверяй счётчик «было/стало», новые тесты не должны увеличивать число падений.
+- **Все тесты зелёные** — так и держать. Регистрации, сброса/подтверждения пароля и верификации email в проекте нет (роуты закомментированы в `routes/web/auth.php`, колонки `email_verified_at` нет) — тестов на них тоже нет. Логин (`login.store`) отвечает JSON с JWT и открывает web-сессию.
+- **Без захардкоженных ID окружения**: ID бота/ответственного и т.п. тест задаёт сам через `config([...])` и сверяется с этим значением, а не с числом из `.env`/прода. Фабрики не завязаны на конкретные ID: `UserFactory` даёт случайные `b_group_id`/`b_company_id`, `TaskFactory` создаёт тип проблемы через `TaskProblemTypeFactory`. Нужные значения передавай в `create([...])` явно.
 - **Никогда не включай `RefreshDatabase` глобально, не убедившись, что подключение `:memory:`** — на реальном MySQL `ff_ts_lk` это `migrate:fresh` и потеря dev-данных.
 - Детальные паттерны (префикс в `assertDatabaseHas`, `actingAs($user, 'api')`, `Http::fake()` для Bitrix, фабрики) — в скиле `pest-test-author`.

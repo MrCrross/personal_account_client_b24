@@ -1,6 +1,7 @@
 {
     "private": true,
     "type": "module",
+    "packageManager": "pnpm@12.10.1",
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
@@ -30,6 +31,7 @@
         "vue-tsc": "^2.2.12"
     },
     "dependencies": {
+        "@inertiajs/core": "^2.3.29",
         "@inertiajs/vue3": "^2.3.24",
         "@tiptap/extension-placeholder": "^3.23.6",
         "@tiptap/starter-kit": "^3.23.6",

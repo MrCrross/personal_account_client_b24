@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Modules\Settings\Enums\ProfileThemeEnum;
 use App\Models\Bitrix24\BSonetGroup;
 use App\Models\Bitrix24\Crm\BCrmCompany;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,10 +16,11 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
-    use Notifiable;
+
     use HasRoles;
+    use Notifiable;
 
     protected $table = 'users';
 
@@ -34,7 +36,7 @@ class User extends Authenticatable implements JWTSubject
         'b_company_id',
         'password',
         'telegram_chat_id',
-        'theme'
+        'theme',
     ];
 
     /**
@@ -54,8 +56,8 @@ class User extends Authenticatable implements JWTSubject
         $prefix = config('database.prefix', '');
 
         // Если префикс еще не добавлен - добавляем
-        if ($prefix && !str_starts_with($table, $prefix)) {
-            $this->table = $prefix . $table;
+        if ($prefix && ! str_starts_with($table, $prefix)) {
+            $this->table = $prefix.$table;
         }
     }
 
@@ -67,9 +69,8 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'theme' => ProfileThemeEnum::class
+            'theme' => ProfileThemeEnum::class,
         ];
     }
 

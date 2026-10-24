@@ -3,7 +3,7 @@
 namespace App\Http\Modules\Bitrix\Services;
 
 use App\Http\Wrappers\BWebHookConstructor;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Log;
 
 class BDiskService extends BWebHookConstructor
@@ -14,7 +14,7 @@ class BDiskService extends BWebHookConstructor
      * @param  array  $files  - массив UploadFile
      * @param  int  $taskId  - для подписи названия файла
      *
-     * @throws \Illuminate\Http\Client\ConnectionException
+     * @throws ConnectionException
      */
     public function store(array $files, int $taskId): array
     {
@@ -42,7 +42,7 @@ class BDiskService extends BWebHookConstructor
      *
      * @return array{name: string, size: int, download_url: string}|null
      *
-     * @throws \Illuminate\Http\Client\ConnectionException
+     * @throws ConnectionException
      */
     public function getAttachedObject(int $id): ?array
     {
@@ -55,7 +55,7 @@ class BDiskService extends BWebHookConstructor
     /**
      * @return array{name: string, size: int, download_url: string}|null
      *
-     * @throws \Illuminate\Http\Client\ConnectionException
+     * @throws ConnectionException
      */
     private function fetchDiskObject(string $route, int $id): ?array
     {
@@ -88,7 +88,7 @@ class BDiskService extends BWebHookConstructor
      *
      * @return array{name: string, content_type: string, body: string}|null
      *
-     * @throws \Illuminate\Http\Client\ConnectionException
+     * @throws ConnectionException
      */
     public function downloadAttachedObject(int $attachedObjectId): ?array
     {
@@ -97,7 +97,7 @@ class BDiskService extends BWebHookConstructor
             return null;
         }
 
-        $response = Http::get($object['download_url']);
+        $response = $this->download($object['download_url']);
         if (! $response->successful()) {
             return null;
         }

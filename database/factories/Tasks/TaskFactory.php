@@ -3,6 +3,7 @@
 namespace Database\Factories\Tasks;
 
 use App\Models\Tasks\Task;
+use App\Models\Tasks\TaskProblemType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,7 +21,7 @@ class TaskFactory extends Factory
             'person_phone' => fake()->numerify('89#########'),
             'b_task_id' => fake()->numberBetween(1000, 999999),
             'user_creator_id' => User::factory(),
-            'problem_type_id' => 1,
+            'problem_type_id' => TaskProblemType::factory(),
         ];
     }
 }

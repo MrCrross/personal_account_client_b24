@@ -3,19 +3,30 @@
 namespace App\Http\Wrappers;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 abstract class BWebHookConstructor
 {
+    public const DRIVER_WEBHOOK = 'webhook';
+
+    public const DRIVER_DATABASE = 'database';
+
     private string $webhook;
+
     private string $link = '';
+
+    private string $method = '';
+
     private array $bodyData = [];
+
     protected int $createdByUser;
+
     public function __construct()
     {
-        $this->webhook = config('b24.webhook');
-        if (!Str::endsWith($this->webhook, '/')) {
+        $this->webhook = (string) config('b24.webhook');
+        if (! Str::endsWith($this->webhook, '/')) {
             $this->webhook .= '/';
         }
         $this->createdByUser = config('b24.createdByUser');
@@ -23,12 +34,11 @@ abstract class BWebHookConstructor
 
     /**
      * Путь до хука в конфиге
-     * @param string $path
-     * @return void
      */
     protected function setRoute(string $path): void
     {
-        $this->link = $this->webhook . config('b24.routes.' . $path);
+        $this->method = config('b24.routes.'.$path);
+        $this->link = $this->webhook.$this->method;
     }
 
     protected function addSelect(array $select): void
@@ -41,10 +51,6 @@ abstract class BWebHookConstructor
         $this->bodyData['ORDER'] = $order;
     }
 
-    /**
-     * @param array $filters
-     * @return void
-     */
     protected function addFilters(array $filters): void
     {
         $this->bodyData['FILTER'] = $filters;
@@ -53,7 +59,7 @@ abstract class BWebHookConstructor
     protected function addFields(array $fields, bool $isLowerCase = true): void
     {
         $fieldsParamName = 'fields';
-        if (!$isLowerCase) {
+        if (! $isLowerCase) {
             $fieldsParamName = 'FIELDS';
         }
         $this->bodyData[$fieldsParamName] = $fields;
@@ -69,11 +75,6 @@ abstract class BWebHookConstructor
         $this->bodyData = $bodyData;
     }
 
-    /**
-     * @param string $field
-     * @param array|string|int $value
-     * @return void
-     */
     protected function addFieldInBody(string $field, array|string|int $value): void
     {
         $this->bodyData[$field] = $value;
@@ -81,15 +82,20 @@ abstract class BWebHookConstructor
 
     /**
      * @return array|mixed|void
+     *
      * @throws ConnectionException
      */
     protected function execute(bool $isJson = false): mixed
     {
         $bodyData = $this->bodyData;
+        $this->bodyData = [];
+        // B24_DRIVER=database: без вебхука, запись/чтение локальных таблиц b_*
+        if ($this->usesDatabaseDriver()) {
+            return (new BLocalRest)->call($this->method, $bodyData);
+        }
         if ($isJson) {
             $bodyData = json_encode($bodyData);
         }
-        $this->bodyData = [];
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
@@ -101,5 +107,24 @@ abstract class BWebHookConstructor
         }
 
         return $response;
+    }
+
+    /**
+     * Скачать файл по DOWNLOAD_URL, который вернул Битрикс-Диск.
+     *
+     * @throws ConnectionException
+     */
+    protected function download(string $url): Response
+    {
+        if ($this->usesDatabaseDriver()) {
+            return (new BLocalRest)->download($url);
+        }
+
+        return Http::get($url);
+    }
+
+    private function usesDatabaseDriver(): bool
+    {
+        return config('b24.driver') === self::DRIVER_DATABASE;
     }
 }

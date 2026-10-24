@@ -1,0 +1,56 @@
+name: ts_lk
+
+x-app: &app
+  build: ./php
+  image: ts_lk-php:local
+  working_dir: /var/www
+  # vite при частых правках .env иногда падает на перезапуске (laravel-vite-plugin) — поднимаем сами
+  restart: unless-stopped
+  volumes:
+    - ..:/var/www
+    # node_modules — в именованном томе: нативные бинарники (esbuild, rollup, tailwind oxide)
+    # должны быть linux-версии, плюс так в разы быстрее, чем через bind mount с Windows
+    - node_modules:/var/www/node_modules
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ff_ts_lk
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  app:
+    <<: *app
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    environment:
+      PHP_CLI_SERVER_WORKERS: 4
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  vite:
+    <<: *app
+    command: pnpm dev
+    environment:
+      # см. vite.config.ts: слушать все интерфейсы контейнера, браузеру отдавать localhost, polling для Windows
+      VITE_DOCKER: 1
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+
+volumes:
+  mysql_data:
+  node_modules:

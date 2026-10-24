@@ -9,13 +9,14 @@ deploy_to_server:
     - main  # или master, в зависимости от вашей ветки
   script:
     # Раннер стоит прямо на продакшен-сервере — SSH не нужен, работаем в $PROJECT_PATH напрямую.
-    # ВНИМАНИЕ: на сервере должен быть установлен yarn (Classic, v1.x).
-    # Если yarn там не установлен — установить (npm i -g yarn) или временно вернуть npm install / npm run build.
+    # ВНИМАНИЕ: на сервере нужны PHP 8.5 и pnpm той версии, что указана в package.json (packageManager):
+    # `corepack enable` (pnpm подтянется сам) или `npm i -g pnpm@<версия>`.
     - cd $PROJECT_PATH
     - git pull origin main
-    # composer install ДО yarn build: vite.config.ts подключает wayfinder(), который во время сборки
+    # composer install ДО pnpm build: vite.config.ts подключает wayfinder(), который во время сборки
     # дёргает `php artisan wayfinder:generate` — нужен уже готовый vendor/autoload.php.
     - composer install --no-dev --optimize-autoloader --no-interaction
-    - yarn install --frozen-lockfile --production=false
-    - yarn build
+    # devDependencies нужны для сборки (vite, vue-tsc) — pnpm ставит их по умолчанию
+    - pnpm install --frozen-lockfile
+    - pnpm build
     - php artisan optimize:clear

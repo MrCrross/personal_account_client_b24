@@ -23,6 +23,7 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 package-lock.json
+yarn.lock
 /auth.json
 /.fleet
 /.idea
@@ -31,6 +32,5 @@ package-lock.json
 /.zed
 /.github
 /.scribe
-/docker
 .claude/settings.*
 /.playwright-mcp/

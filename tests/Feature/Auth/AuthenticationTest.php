@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
@@ -14,48 +16,53 @@ test('login screen can be rendered', function () {
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $response = $this->post(route('login.store'), [
+    $response = $this->postJson(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    // Вход открывает web-сессию и выдаёт JWT для API
+    $response->assertOk()
+        ->assertJsonPath('error', false)
+        ->assertJsonPath('data.user.id', $user->id)
+        ->assertJsonStructure(['data' => ['access_token', 'token_type', 'expires_on']]);
+    $this->assertAuthenticatedAs($user, 'web');
 });
 
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post(route('login.store'), [
+    $this->postJson(route('login.store'), [
         'email' => $user->email,
         'password' => 'wrong-password',
-    ]);
+    ])->assertUnprocessable()->assertJsonValidationErrors('email');
 
-    $this->assertGuest();
+    $this->assertGuest('web');
 });
 
 test('users can logout', function () {
     $user = User::factory()->create();
+    $token = auth('api')->login($user);
 
-    $response = $this->actingAs($user)->post(route('logout'));
+    $this->actingAs($user, 'web')
+        ->withToken($token)
+        ->post(route('logout'))
+        ->assertOk();
 
-    $this->assertGuest();
-    $response->assertRedirect(route('home'));
+    $this->assertGuest('web');
 });
 
 test('users are rate limited', function () {
     $user = User::factory()->create();
 
-    RateLimiter::increment(implode('|', [$user->email, '127.0.0.1']), amount: 10);
+    $throttleKey = Str::transliterate(Str::lower($user->email).'|127.0.0.1');
+    RateLimiter::increment($throttleKey, amount: 10);
 
-    $response = $this->post(route('login.store'), [
+    $this->postJson(route('login.store'), [
         'email' => $user->email,
-        'password' => 'wrong-password',
-    ]);
+        'password' => 'password',
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['email' => 'Вы заблокированы за множественные попытки входа.']);
 
-    $response->assertSessionHasErrors('email');
-
-    $errors = session('errors');
-
-    $this->assertStringContainsString('Too many login attempts', $errors->first('email'));
+    $this->assertGuest('web');
 });

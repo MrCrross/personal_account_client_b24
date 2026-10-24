@@ -1,8 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -32,24 +33,23 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
-    expect($user->email_verified_at)->toBeNull();
 });
 
-test('email verification status is unchanged when the email address is unchanged', function () {
+test('email must be unique among users', function () {
+    $other = User::factory()->create();
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
+        ->from(route('profile.edit'))
         ->patch(route('profile.update'), [
             'name' => 'Test User',
-            'email' => $user->email,
+            'email' => $other->email,
         ]);
 
     $response
-        ->assertSessionHasNoErrors()
+        ->assertSessionHasErrors('email')
         ->assertRedirect(route('profile.edit'));
-
-    expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
 test('user can delete their account', function () {
